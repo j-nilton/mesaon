@@ -1,3 +1,4 @@
+//Contrato de Usuário como colaborador
 export interface User {
   id: string;
   email: string;
