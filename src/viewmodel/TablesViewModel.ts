@@ -1,0 +1,102 @@
+import { useEffect, useMemo, useState } from 'react'
+import { ListTablesByCodeUseCase } from '../usecase/ListTablesByCodeUseCase'
+import { CreateTableUseCase } from '../usecase/CreateTableUseCase'
+import { UpdateTableUseCase } from '../usecase/UpdateTableUseCase'
+import { DeleteTableUseCase } from '../usecase/DeleteTableUseCase'
+import { Table } from '../model/entities/Table'
+
+export function useTablesViewModel(
+  listUC: ListTablesByCodeUseCase,
+  createUC: CreateTableUseCase,
+  updateUC: UpdateTableUseCase,
+  deleteUC: DeleteTableUseCase,
+  accessCode?: string
+) {
+  const [tables, setTables] = useState<Table[]>([])
+  const [loading, setLoading] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
+  const [nameInput, setNameInput] = useState('')
+
+  const load = async () => {
+    if (!accessCode) return
+    setLoading(true)
+    setErrorMessage('')
+    try {
+      const items = await listUC.execute(accessCode)
+      setTables(items)
+    } catch (e: any) {
+      setErrorMessage(e?.message || 'Falha ao carregar mesas.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessCode])
+  useEffect(() => {
+    if (!accessCode) return
+    const id = setInterval(() => {
+      load()
+    }, 5000)
+    return () => clearInterval(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessCode])
+
+  const create = async () => {
+    if (!accessCode) return
+    setLoading(true)
+    setErrorMessage('')
+    try {
+      const created = await createUC.execute(accessCode, { name: nameInput })
+      setTables(prev => [...prev, created])
+      setNameInput('')
+    } catch (e: any) {
+      setErrorMessage(e?.message || 'Falha ao criar mesa.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const release = async (id: string) => {
+    setLoading(true)
+    setErrorMessage('')
+    try {
+      const updated = await updateUC.execute(id, { orders: [] })
+      setTables(prev => prev.map(t => (t.id === id ? updated : t)))
+    } catch (e: any) {
+      setErrorMessage(e?.message || 'Falha ao liberar mesa.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const remove = async (id: string) => {
+    setLoading(true)
+    setErrorMessage('')
+    try {
+      await deleteUC.execute(id)
+      setTables(prev => prev.filter(t => t.id !== id))
+    } catch (e: any) {
+      setErrorMessage(e?.message || 'Falha ao excluir mesa.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const canCreate = useMemo(() => !!nameInput.trim() && /^\d{9}$/.test(accessCode || ''), [nameInput, accessCode])
+
+  return {
+    tables,
+    loading,
+    errorMessage,
+    nameInput,
+    setNameInput,
+    load,
+    create,
+    release,
+    remove,
+    canCreate,
+  }
+}
