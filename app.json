@@ -23,7 +23,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.MesaOn"
+      "package": "com.francisnilto.MesaOn"
     },
     "web": {
       "favicon": "./assets/favicon.png"

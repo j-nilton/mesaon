@@ -37,7 +37,7 @@ class DIContainer {
   }
 
   static getRegisterUseCase(): RegisterUseCase {
-    return new RegisterUseCase(this._authService)
+    return new RegisterUseCase(this._authService);
   }
 
   static getResendVerificationEmailUseCase(): ResendVerificationEmailUseCase {

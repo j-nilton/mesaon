@@ -48,7 +48,7 @@ describe('Integração: Fluxo de Autenticação', () => {
     )
   })
 
-  it('deve impedir alteração de papel após logout', async () => {
+  it('deve impedir alteração de papel após logout.', async () => {
     const mockUser = createMockUser()
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
