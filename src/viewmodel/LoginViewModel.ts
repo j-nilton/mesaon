@@ -15,6 +15,7 @@ export interface LoginViewModel {
   navigateToRegister: () => void;
 }
 
+// Implementação do ViewModel de login
 export function useLoginViewModel(loginUseCase: LoginUseCase): LoginViewModel {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,6 +23,7 @@ export function useLoginViewModel(loginUseCase: LoginUseCase): LoginViewModel {
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  // Realiza o login
   const handleLogin = async (): Promise<void> => {
     setIsLoading(true);
     setErrorMessage('');
@@ -39,6 +41,7 @@ export function useLoginViewModel(loginUseCase: LoginUseCase): LoginViewModel {
     }
   };
 
+  // Navega para tela de cadastro
   const navigateToRegister = (): void => {
     router.push('/register');
   };
