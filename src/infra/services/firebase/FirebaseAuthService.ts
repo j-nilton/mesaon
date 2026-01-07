@@ -13,8 +13,9 @@ import { AuthService } from '../../../model/services/AuthService';
 import { User } from '../../../model/entities/User';
 import { AuthError } from '../../../model/errors/AppError';
 
+// Serviço de Autenticação Firebase
 export class FirebaseAuthService implements AuthService {
-  
+  // Método de login com email e senha
   async login(email: string, pass: string): Promise<User> {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, pass);
@@ -32,7 +33,7 @@ export class FirebaseAuthService implements AuthService {
       throw new AuthError(this.mapFirebaseError(error.code), error.code);
     }
   }
-
+  // Método de registro com email, senha e nome
   async register(name: string, email: string, pass: string): Promise<User> {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
@@ -47,7 +48,7 @@ export class FirebaseAuthService implements AuthService {
         name: name,
         emailVerified: firebaseUser.emailVerified,
       };
-
+      // Adiciona o novo usuário ao Firestore
       await setDoc(doc(firestore, 'users', newUser.id), newUser);
 
       return newUser;
@@ -56,10 +57,11 @@ export class FirebaseAuthService implements AuthService {
     }
   }
 
+  // Método de logout
   async logout(): Promise<void> {
     await signOut(auth);
   }
-
+  // Método para obter o usuário atual
   async getCurrentUser(): Promise<User | null> {
     return new Promise((resolve) => {
       const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -78,6 +80,7 @@ export class FirebaseAuthService implements AuthService {
     });
   }
 
+  // Método para definir a organização do usuário
   async setUserOrganization(userId: string, organizationId: string): Promise<void> {
     const ref = doc(firestore, 'users', userId);
     const snap = await getDoc(ref);
@@ -85,6 +88,7 @@ export class FirebaseAuthService implements AuthService {
     await setDoc(ref, { ...current, organizationId }, { merge: true });
   }
 
+  // Método para definir o papel do usuário (organization ou collaborator)
   async setUserRole(userId: string, role: 'organization' | 'collaborator'): Promise<void> {
     const ref = doc(firestore, 'users', userId);
     const snap = await getDoc(ref);
@@ -92,23 +96,27 @@ export class FirebaseAuthService implements AuthService {
     await setDoc(ref, { ...current, role }, { merge: true });
   }
 
+  // Método para adicionar um código ao histórico do usuário
   async addCodeToHistory(userId: string, code: string): Promise<void> {
     const ref = collection(firestore, 'users', userId, 'codeHistory');
     await addDoc(ref, { code, at: Date.now() });
   }
 
+  // Método para obter o perfil do usuário
   async getUserProfile(userId: string) {
     const ref = doc(firestore, 'users', userId);
     const snap = await getDoc(ref);
     return snap.exists() ? (snap.data() as any) : null;
   }
 
+  // Método para obter o histórico de códigos do usuário
   async getCodeHistory(userId: string): Promise<Array<{ code: string; at: number }>> {
     const ref = collection(firestore, 'users', userId, 'codeHistory');
     const q = await getDocs(ref);
     return q.docs.map(d => d.data() as any);
   }
 
+  // Método para redefinir a senha
   async resetPassword(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(auth, email);
@@ -117,6 +125,7 @@ export class FirebaseAuthService implements AuthService {
     }
   }
 
+  // Método para enviar e-mail de verificação
   async sendVerificationEmail(): Promise<void> {
     if (auth.currentUser) {
       try {
@@ -134,12 +143,14 @@ export class FirebaseAuthService implements AuthService {
     }
   }
 
+  // Método para recarregar o perfil do usuário
   async reloadUser(): Promise<void> {
     if (auth.currentUser) {
       await auth.currentUser.reload();
     }
   }
 
+  // Método para mapear erros do Firebase para erros da aplicação
   private mapFirebaseError(code: string): string {
     switch (code) {
       case 'auth/invalid-email': return 'E-mail inválido.';
