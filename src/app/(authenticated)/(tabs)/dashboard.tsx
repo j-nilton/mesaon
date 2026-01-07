@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, TextInput, useWindowDimensions, Pressable, Alert, Modal, Animated, Easing, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TextInput, useWindowDimensions, Pressable, Alert, Modal, Animated, Easing, ScrollView, Platform, ToastAndroid } from 'react-native'
 import { colors, typography } from '../../theme/theme'
 import { container } from '../../../di/container'
 import React, { useEffect, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
-import { router } from 'expo-router'
+import { router, usePathname } from 'expo-router'
 import { useAppState } from '../../state/AppState'
 import * as Clipboard from 'expo-clipboard'
 import { useTablesViewModel } from '../../../viewmodel/TablesViewModel'
@@ -15,11 +15,18 @@ export default function DashboardScreen() {
   const [query, setQuery] = useState('')
   const [showMenu, setShowMenu] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | undefined>(undefined)
+  const [showFab, setShowFab] = useState(true)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editId, setEditId] = useState<string | undefined>(undefined)
+  const [editName, setEditName] = useState('')
+  const [editWaiter, setEditWaiter] = useState('')
+  const [editNotes, setEditNotes] = useState('')
   const { width } = useWindowDimensions()
   const scale = Math.min(Math.max(width / 375, 0.9), 1.1)
   const { accessCode, setAccessCode, setRole } = useAppState()
   const copyAnim = React.useRef(new Animated.Value(1)).current
   const modalAnim = React.useRef(new Animated.Value(0)).current
+  const pathname = usePathname()
   const vm = useTablesViewModel(
     container.getListTablesByCodeUseCase(),
     container.getCreateTableUseCase(),
@@ -36,6 +43,11 @@ export default function DashboardScreen() {
       Animated.spring(copyAnim, { toValue: 0.96, useNativeDriver: true, speed: 20, bounciness: 6 }),
       Animated.spring(copyAnim, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 6 }),
     ]).start()
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Código copiado para área de transferência', ToastAndroid.SHORT)
+    } else {
+      Alert.alert('Copiado', 'Código copiado para área de transferência')
+    }
   }
 
   useEffect(() => {
@@ -55,6 +67,9 @@ export default function DashboardScreen() {
       useNativeDriver: true,
     }).start()
   }, [createVM.isOpen])
+  useEffect(() => {
+    setShowMenu(false)
+  }, [pathname])
 
   const role = profile?.role
   return (
@@ -100,13 +115,14 @@ export default function DashboardScreen() {
       {formattedCode && (
         <View style={{ alignItems: 'center', marginTop: 8 }}>
           <Animated.View style={{ transform: [{ scale: copyAnim }] }}>
-            <Pressable onPress={copyCode} style={({ pressed }) => [styles.codePill, { opacity: pressed ? 0.9 : 1 }]}>
+            <Pressable onPress={copyCode} style={({ pressed }) => [styles.codePill, { opacity: pressed ? 0.9 : 1, flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+              <Ionicons name="clipboard-outline" size={16} color={colors.text.primary} />
               <Text style={styles.codePillText}>Código de acesso: {formattedCode}</Text>
             </Pressable>
           </Animated.View>
         </View>
       )}
-      {loading || vm.loading ? (
+      {loading || (vm.loading && vm.tables.length === 0) ? (
         <Text style={styles.empty}>Carregando...</Text>
       ) : role === 'organization' ? (
         <View>
@@ -121,7 +137,11 @@ export default function DashboardScreen() {
             }).length === 0 ? (
             <Text style={styles.empty}>Nenhuma mesa cadastrada</Text>
           ) : (
-            <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 96 }]}>
+            <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 180 }]} onScroll={(e) => {
+              const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
+              const nearBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 24
+              setShowFab(!nearBottom)
+            }} scrollEventThrottle={16}>
               {vm.tables
                 .filter(t => {
                   const q = query.trim().toLowerCase()
@@ -141,7 +161,6 @@ export default function DashboardScreen() {
                       </View>
                       <View style={{ flex: 1 }}>
                         <Text style={styles.tableTitle}>{t.name}</Text>
-                        <Text style={[styles.tableStatus, { color }]}>{occupied ? 'Ocupada' : 'Livre'}</Text>
                         {t.waiterName ? <Text style={styles.tableSubtitle}>{t.waiterName}</Text> : null}
                         {t.notes ? <Text style={styles.tableNotes}>{t.notes}</Text> : null}
                       </View>
@@ -160,13 +179,27 @@ export default function DashboardScreen() {
                       <View style={[styles.kebabMenu]}>
                         <Pressable
                           onPress={() => {
+                            setEditId(t.id)
+                            setEditName(t.name)
+                            setEditWaiter(t.waiterName || '')
+                            setEditNotes(t.notes || '')
+                            setOpenMenuId(undefined)
+                            setEditOpen(true)
+                          }}
+                          style={({ pressed }) => [{ paddingVertical: 8 }, pressed ? { opacity: 0.8 } : null]}
+                        >
+                          <Text style={styles.kebabItem}>Editar dados da mesa</Text>
+                        </Pressable>
+                        <Pressable
+                          disabled={!occupied}
+                          onPress={() => {
                             Alert.alert('Liberar mesa', `Deseja liberar "${t.name}"?`, [
                               { text: 'Cancelar', style: 'cancel' },
                               { text: 'Liberar', onPress: () => vm.release(t.id) },
                             ])
                             setOpenMenuId(undefined)
                           }}
-                          style={({ pressed }) => [{ paddingVertical: 8 }, pressed ? { opacity: 0.8 } : null]}
+                          style={({ pressed }) => [{ paddingVertical: 8, opacity: !occupied ? 0.5 : 1 }, pressed ? { opacity: 0.8 } : null]}
                         >
                           <Text style={styles.kebabItem}>Liberar mesa</Text>
                         </Pressable>
@@ -240,6 +273,7 @@ export default function DashboardScreen() {
             backgroundColor: pressed ? '#E67E22' : colors.primary,
             shadowOpacity: 0.2,
             opacity: fabEnabled ? 1 : 0.6,
+            display: showFab ? 'flex' : 'none',
           },
         ]}
         disabled={!fabEnabled}
@@ -320,7 +354,7 @@ export default function DashboardScreen() {
                       onPress={async () => {
                         const created = await createVM.submit()
                         if (created) {
-                          vm.load()
+                          vm.refresh()
                         }
                       }}
                     >
@@ -331,17 +365,100 @@ export default function DashboardScreen() {
           </Animated.View>
         </View>
       </Modal>
+      <Modal visible={editOpen} transparent animationType="fade" onRequestClose={() => setEditOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setEditOpen(false)} />
+          <Animated.View style={[styles.modalCard]}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+              <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
+                <Text style={styles.modalTitle}>Editar Mesa</Text>
+              </View>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Text style={styles.label}>Nome da mesa</Text>
+                <View style={styles.inputBox}>
+                  <TextInput
+                    placeholder="Digite o nome da mesa"
+                    placeholderTextColor={colors.text.secondary}
+                    value={editName}
+                    onChangeText={setEditName}
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Text style={styles.label}>Nome do garçom</Text>
+                <View style={styles.inputBox}>
+                  <TextInput
+                    placeholder="Informe o nome do garçom"
+                    placeholderTextColor={colors.text.secondary}
+                    value={editWaiter}
+                    onChangeText={setEditWaiter}
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Text style={styles.label}>Observações</Text>
+                <View style={[styles.inputBox, { minHeight: 96 }]}>
+                  <TextInput
+                    placeholder="Adicione observações sobre a mesa"
+                    placeholderTextColor={colors.text.secondary}
+                    value={editNotes}
+                    onChangeText={setEditNotes}
+                    style={[styles.input, { minHeight: 96 }]}
+                    multiline
+                  />
+                </View>
+              </View>
+              <View style={styles.modalFooter}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.secondaryBtn,
+                    { borderColor: colors.primary, backgroundColor: '#FFF', opacity: pressed ? 0.8 : 1 },
+                  ]}
+                  onPress={() => setEditOpen(false)}
+                >
+                  <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.primaryBtn,
+                    { backgroundColor: pressed ? '#E67E22' : colors.primary, opacity: editName.trim() ? 1 : 0.7 },
+                  ]}
+                  disabled={!editName.trim()}
+                  onPress={async () => {
+                    if (!editId) return
+                    await container.getUpdateTableUseCase().execute(editId, {
+                      name: editName.trim(),
+                      waiterName: editWaiter.trim() || undefined,
+                      notes: editNotes.trim() || undefined,
+                    } as any)
+                    setEditOpen(false)
+                    setEditId(undefined)
+                    setEditName('')
+                    setEditWaiter('')
+                    setEditNotes('')
+                    vm.refresh()
+                  }}
+                >
+                  <Text style={styles.primaryBtnText}>Salvar</Text>
+                </Pressable>
+              </View>
+            </ScrollView>
+          </Animated.View>
+        </View>
+      </Modal>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: 12 },
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 16 },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, gap: 10 },
   search: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFEAE2' },
   avatar: { backgroundColor: '#DDD9D2' },
   empty: { color: colors.text.secondary, fontSize: typography.size.md, textAlign: 'center', marginTop: 32 },
-  title: { fontSize: typography.size.lg, fontWeight: 'bold', color: colors.text.primary, marginBottom: 8 },
+  title: { fontSize: typography.size.lg, fontWeight: 'bold', color: colors.text.primary, marginTop: 14, marginBottom: 8 },
   helper: { color: colors.text.secondary },
   card: { backgroundColor: colors.surface, borderColor: colors.border, borderWidth: 1, borderRadius: 12, padding: 12, marginVertical: 12 },
   statLabel: { color: colors.text.secondary, marginBottom: 6 },
@@ -393,6 +510,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     gap: 4,
+    zIndex: 2000,
+    elevation: 2,
   },
   kebabItem: { color: colors.text.primary },
   menu: {
@@ -405,6 +524,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 8,
     paddingHorizontal: 12,
+    zIndex: 1000,
+    elevation: 3,
   },
   menuItem: { color: colors.text.primary, paddingVertical: 6 },
   codePill: { backgroundColor: '#EFEAE2', borderColor: colors.border, borderWidth: 1, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12 },

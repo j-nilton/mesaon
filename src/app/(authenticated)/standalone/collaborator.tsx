@@ -113,7 +113,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: 16 },
   logo: { width: 200, height: 140 },
-  title: { color: colors.text.primary, fontWeight: 'bold', marginBottom: 12 },
+  title: { color: colors.text.primary, marginBottom: 26 },
   inputContainer: { width: '100%', backgroundColor: '#EDEAE4', borderColor: colors.border, borderWidth: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   input: { flex: 1, color: colors.text.primary, fontSize: typography.size.md },
   copyBtn: { paddingHorizontal: 12 },

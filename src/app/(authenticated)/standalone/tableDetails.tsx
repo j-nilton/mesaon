@@ -192,11 +192,12 @@ export default function TableDetailsScreen() {
               contentContainerStyle={{
                 paddingHorizontal: 16,
                 paddingBottom: 16,
+                paddingTop: 4,
               }}
             >
               <View style={{ paddingTop: 8 }}>
                 <Text style={styles.label}>Categoria</Text>
-                <View style={styles.selectBox}>
+                <View style={[styles.selectBox, { paddingVertical: 4 }]}>
                   <Picker
                     selectedValue={selectedCategory}
                     onValueChange={(value) => {
@@ -205,7 +206,7 @@ export default function TableDetailsScreen() {
                     }}
                     mode="dropdown"
                     dropdownIconColor={colors.text.secondary}
-                    style={{ height: 48, width: '100%', color: colors.text.primary }}
+                    style={{ height: 52, width: '100%', color: colors.text.primary }}
                     itemStyle={{ fontSize: typography.size.md }}
                   >
                     {categories.map(c => (
@@ -216,13 +217,13 @@ export default function TableDetailsScreen() {
               </View>
               <View style={{ paddingTop: 8 }}>
                 <Text style={styles.label}>Produto</Text>
-                <View style={styles.selectBox}>
+                <View style={[styles.selectBox, { paddingVertical: 4 }]}>
                   <Picker
                     selectedValue={selectedProductId || ''}
                     onValueChange={(value) => setSelectedProductId(value || undefined)}
                     mode="dropdown"
                     dropdownIconColor={colors.text.secondary}
-                    style={{ height: 48, width: '100%', color: colors.text.primary }}
+                    style={{ height: 52, width: '100%', color: colors.text.primary }}
                     itemStyle={{ fontSize: typography.size.md }}
                   >
                     <Picker.Item label="Selecione um produto" value="" />

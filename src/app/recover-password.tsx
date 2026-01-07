@@ -30,7 +30,7 @@ export default function RecoverPasswordScreen() {
           onPress={async () => {
             const ok = await vm.submit()
             if (ok) {
-              Alert.alert('E-mail enviado', 'Verifique sua caixa de entrada para redefinir a senha.', [
+              Alert.alert('E-mail enviado', 'Verifique sua caixa de entrada ou spam para redefinir a senha.', [
                 { text: 'OK', onPress: () => router.replace('/') }
               ])
             }

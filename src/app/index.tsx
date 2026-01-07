@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   welcomeText: {
-    fontSize: typography.size.lg,
+    fontSize: typography.size.xl,
     fontWeight: "bold",
     color: colors.text.primary,
     marginBottom: 24,
@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: typography.size.lg,
     color: colors.text.secondary,
-    marginBottom: 8,
+    marginBottom: 2,
   },
   form: {
     width: "100%",
@@ -160,5 +160,6 @@ const styles = StyleSheet.create({
   registerButton: {
     marginTop: 4,
     height: 30,
+    fontWeight: '800',
   },
 });

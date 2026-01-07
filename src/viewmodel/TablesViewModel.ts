@@ -38,11 +38,21 @@ export function useTablesViewModel(
   useEffect(() => {
     if (!accessCode) return
     const id = setInterval(() => {
-      load()
+      refresh()
     }, 5000)
     return () => clearInterval(id)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessCode])
+
+  const refresh = async () => {
+    if (!accessCode) return
+    try {
+      const items = await listUC.execute(accessCode)
+      setTables(items)
+    } catch (e: any) {
+      // mantém erro silencioso para evitar "piscar"
+    }
+  }
 
   const create = async () => {
     if (!accessCode) return
@@ -94,6 +104,7 @@ export function useTablesViewModel(
     nameInput,
     setNameInput,
     load,
+    refresh,
     create,
     release,
     remove,

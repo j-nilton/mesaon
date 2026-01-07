@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, useWindowDimensions, Pressable, Modal, ScrollView, Alert, Animated, Easing } from 'react-native'
+import { View, Text, StyleSheet, TextInput, useWindowDimensions, Pressable, Modal, ScrollView, Alert, Animated, Easing, Platform, ToastAndroid } from 'react-native'
 import { colors, typography } from '../../theme/theme'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -8,7 +8,7 @@ import { useMenuViewModel } from '../../../viewmodel/MenuViewModel'
 import { ProductCategory } from '../../../model/entities/Product'
 import * as Clipboard from 'expo-clipboard'
 import { Picker } from '@react-native-picker/picker'
-import { router } from 'expo-router'
+import { router, usePathname } from 'expo-router'
 
 export default function MenuScreen() {
   const { accessCode, role, setAccessCode, setRole } = useAppState()
@@ -26,6 +26,7 @@ export default function MenuScreen() {
   const categories: ProductCategory[] = useMemo(() => ['Bebidas', 'Pizzas', 'Pratos', 'Petiscos', 'Sobremesas'], [])
   const formattedCode = useMemo(() => (accessCode ? `${accessCode.slice(0,3)} - ${accessCode.slice(3,6)} - ${accessCode.slice(6,9)}` : undefined), [accessCode])
   const copyAnim = useRef(new Animated.Value(1)).current
+  const pathname = usePathname()
   const copyCode = async () => {
     if (!accessCode) return
     // Copia somente dígitos para área de transferência
@@ -34,7 +35,15 @@ export default function MenuScreen() {
       Animated.spring(copyAnim, { toValue: 0.96, useNativeDriver: true, speed: 20, bounciness: 6 }),
       Animated.spring(copyAnim, { toValue: 1, useNativeDriver: true, speed: 20, bounciness: 6 }),
     ]).start()
+    if (Platform.OS === 'android') {
+      ToastAndroid.show('Código copiado para área de transferência', ToastAndroid.SHORT)
+    } else {
+      Alert.alert('Copiado', 'Código copiado para área de transferência')
+    }
   }
+  useEffect(() => {
+    setShowMenu(false)
+  }, [pathname])
 
   return (
     <View style={styles.container}>
@@ -42,7 +51,7 @@ export default function MenuScreen() {
         <View style={[styles.search, { height: 44 * scale, borderRadius: 22 * scale, paddingHorizontal: 16 }]}>
           <Ionicons name="search" size={18 * scale} color={colors.text.secondary} style={{ marginRight: 8 }} />
           <TextInput
-            placeholder="Pesquise aqui..."
+            placeholder="Pesquise o produto aqui..."
             placeholderTextColor={colors.text.secondary}
             value={vm.query}
             onChangeText={vm.setQuery}
@@ -75,11 +84,15 @@ export default function MenuScreen() {
             </Pressable>
           </View>
         )}
+        {showMenu ? (
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowMenu(false)} />
+        ) : null}
       </View>
       {formattedCode && (
         <View style={{ alignItems: 'center', marginTop: 8 }}>
           <Animated.View style={{ transform: [{ scale: copyAnim }] }}>
-            <Pressable onPress={copyCode} style={({ pressed }) => [styles.codePill, { opacity: pressed ? 0.9 : 1 }]}>
+            <Pressable onPress={copyCode} style={({ pressed }) => [styles.codePill, { opacity: pressed ? 0.9 : 1, flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
+              <Ionicons name="clipboard-outline" size={16} color={colors.text.primary} />
               <Text style={styles.codePillText}>Código de acesso: {formattedCode}</Text>
             </Pressable>
           </Animated.View>
@@ -100,13 +113,19 @@ export default function MenuScreen() {
         <Text style={styles.empty}>Sem produtos cadastrados</Text>
       ) : (
         <ScrollView contentContainerStyle={{ paddingHorizontal: 4, paddingVertical: 16 }}>
-          {vm.products.map(p => (
+          {vm.products
+            .slice()
+            .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+            .map(p => (
             <View key={p.id} style={[styles.card, { justifyContent: 'space-between', minHeight: 56 }]}>
               <View style={{ flex: 1, paddingRight: 8 }}>
                 <Text style={styles.productTitle}>{p.name}</Text>
                 <Text style={styles.productPrice}>
                   {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(p.price)}
                 </Text>
+                {p.description ? (
+                  <Text style={{ color: colors.text.secondary, marginTop: 2 }}>{p.description}</Text>
+                ) : null}
               </View>
               <View style={{ flexDirection: 'row', gap: 8 }}>
                 <Pressable
@@ -265,12 +284,12 @@ export default function MenuScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: 12 },
+  container: { flex: 1, backgroundColor: colors.background, padding: 12, },
   empty: { color: colors.text.secondary, fontSize: typography.size.md, textAlign: 'center', marginTop: 32 },
-  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 16 },
+  topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 24, gap: 10 },
   search: { flex: 1, flexDirection: 'row', alignItems: 'center', backgroundColor: '#EFEAE2' },
   avatar: { backgroundColor: '#DDD9D2' },
-  tabs: { flexDirection: 'row', gap: 16, marginTop: 12 },
+  tabs: { flexDirection: 'row', gap: 16, marginTop: 16 },
   tabItem: { paddingBottom: 8 },
   tabText: { color: colors.text.secondary, fontWeight: '600' },
   tabItemActive: { borderBottomWidth: 2, borderColor: '#C7BBA5' },
@@ -334,7 +353,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: 12
   },
   menuItem: { color: colors.text.primary, paddingVertical: 6 },
 })

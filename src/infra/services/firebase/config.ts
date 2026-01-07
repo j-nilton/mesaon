@@ -1,16 +1,23 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import Constants from 'expo-constants';
 
-// TODO: Preencher com as chaves reais do projeto ou usar variáveis de ambiente
+const extra = Constants.expoConfig?.extra as any;
 const firebaseConfig = {
-  apiKey: "AIzaSyAOCkZ8TmepGq0YsZnvg6Q-BC9kkjkgE6E",
-  authDomain: "mesaon-933fe.firebaseapp.com",
-  projectId: "mesaon-933fe",
-  storageBucket: "mesaon-933fe.firebasestorage.app",
-  messagingSenderId: "132003284812",
-  appId: "1:132003284812:web:1690aafc77442868b371e9"
+  apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? extra?.FIREBASE_API_KEY,
+  authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN ?? extra?.FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID ?? extra?.FIREBASE_PROJECT_ID,
+  storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET ?? extra?.FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? extra?.FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? extra?.FIREBASE_APP_ID,
 };
+
+Object.entries(firebaseConfig).forEach(([key, value]) => {
+  if (!value) {
+    console.warn(`Config Firebase ausente: ${key}. Verifique suas variáveis EXPO_PUBLIC_* ou extra.`);
+  }
+});
 
 // Singleton para garantir uma única instância
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

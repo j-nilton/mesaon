@@ -29,7 +29,7 @@ export default function RegisterScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.welcomeText}>Seja Bem-vindo ao MesaOn!</Text>
+          <Text style={styles.welcomeText}>Seja Bem-vindo!</Text>
 
           <View style={styles.logoContainer}>
             <Image
@@ -64,6 +64,13 @@ export default function RegisterScreen() {
             onChangeText={viewModel.setPassword}
             isPassword
           />
+          <View style={{ marginTop: 8 }}>
+            <Text style={[styles.passwordHint, viewModel.passwordRules.length ? styles.passOk : styles.passBad]}>• Mínimo de 8 caracteres</Text>
+            <Text style={[styles.passwordHint, viewModel.passwordRules.upper ? styles.passOk : styles.passBad]}>• Contém letra maiúscula</Text>
+            <Text style={[styles.passwordHint, viewModel.passwordRules.lower ? styles.passOk : styles.passBad]}>• Contém letra minúscula</Text>
+            <Text style={[styles.passwordHint, viewModel.passwordRules.number ? styles.passOk : styles.passBad]}>• Contém número</Text>
+            <Text style={styles.strengthText}>Força da senha: {viewModel.strength}</Text>
+          </View>
 
           <Input
             placeholder="Confirmar senha"
@@ -90,6 +97,7 @@ export default function RegisterScreen() {
             title="Faça login"
             variant="text"
             onPress={viewModel.navigateToLogin}
+            style={styles.loginButton}
           />
         </View>
       </ScrollView>
@@ -112,15 +120,15 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   welcomeText: {
-    fontSize: typography.size.lg,
+    fontSize: typography.size.xl,
     fontWeight: "bold",
     color: colors.text.primary,
     marginBottom: 24,
     textAlign: "center",
   },
   logoContainer: {
-    width: 120,
-    height: 120,
+    width: 150,
+    height: 150,
     marginBottom: 24,
     justifyContent: "center",
     alignItems: "center",
@@ -132,7 +140,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: typography.size.lg,
     color: colors.text.secondary,
-    marginBottom: 8,
+    marginBottom: 2,
   },
   form: {
     width: "100%",
@@ -142,6 +150,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
   },
+  passwordHint: { fontSize: typography.size.sm, color: colors.text.secondary },
+  passOk: { color: colors.status.success },
+  passBad: { color: colors.status.error },
+  strengthText: { marginTop: 4, fontWeight: '600', color: colors.text.primary },
   registerButton: {
     marginTop: 16,
   },
@@ -152,5 +164,10 @@ const styles = StyleSheet.create({
   footerText: {
     color: colors.text.secondary,
     fontSize: typography.size.sm,
+  },
+  loginButton: {
+    marginTop: 4,
+    height: 30,
+    fontWeight: '800',
   },
 });

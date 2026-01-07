@@ -4,6 +4,9 @@
 node_modules/
 .trae/
 CHANGELOG.md
+android/app/google-services.json
+src/infra/services/firebase/
+.env
 
 # Expo
 .expo/
@@ -40,5 +43,5 @@ yarn-error.*
 
 # generated native folders
 /ios
-# /android
+/android
 

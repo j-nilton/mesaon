@@ -14,7 +14,9 @@ export class TableServiceFirebase implements TableService {
   async create(accessCode: string, data: { name: string; waiterName?: string; notes?: string; orders?: TableOrder[] }): Promise<Table> {
     const now = Date.now()
     const total = (data.orders || []).reduce((acc, it) => acc + it.price * it.quantity, 0)
-    const payload = { accessCode, name: data.name, waiterName: data.waiterName, notes: data.notes, orders: data.orders || [], total, createdAt: now }
+    const payload: any = { accessCode, name: data.name, orders: data.orders || [], total, createdAt: now }
+    if (data.waiterName) payload.waiterName = data.waiterName
+    if (data.notes) payload.notes = data.notes
     const ref = await addDoc(collection(firestore, 'tables'), payload)
     const snap = await getDoc(ref)
     return { id: ref.id, ...(snap.data() as any) } as Table
