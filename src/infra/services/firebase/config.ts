@@ -5,6 +5,7 @@ import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
+// Configuração do Firebase
 const extra = Constants.expoConfig?.extra as any;
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY ?? extra?.FIREBASE_API_KEY,
@@ -15,18 +16,30 @@ const firebaseConfig = {
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID ?? extra?.FIREBASE_APP_ID,
 };
 
+// Validação da configuração do Firebase
 Object.entries(firebaseConfig).forEach(([key, value]) => {
   if (!value) {
     console.warn(`Config Firebase ausente: ${key}. Verifique suas variáveis EXPO_PUBLIC_* ou extra.`);
   }
 });
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+// Inicialização do Firebase
+let app;
+// Inicializa o Firebase se ainda não tiver sido inicializado
+if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+} else {
+    // Se já houver uma instância inicializada, obtém-a
+    app = getApp();
+}
 
+// Inicialização do Firebase Auth
 const auth = initializeAuth(app, {
+  // Configuração de persistência para o Firebase Auth
   persistence: getReactNativePersistence(AsyncStorage)
 });
 
+// Inicialização do Firestore
 const firestore = getFirestore(app);
 
 export { app, auth, firestore };
