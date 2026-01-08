@@ -1,13 +1,14 @@
 import { AuthService } from '../model/services/AuthService'
 
 export class SetUserRoleUseCase {
+  // Injeta o serviço de autenticação
   constructor(private authService: AuthService) {}
 
   async execute(role: 'organization' | 'collaborator'): Promise<void> {
-    // Garante que o usuário está autenticado
+    // Busca usuário autenticado
     const user = await this.authService.getCurrentUser()
     if (!user) throw new Error('Usuário não autenticado.')
-    // Atualiza o papel do usuário
+    // Define papel do usuário
     await this.authService.setUserRole(user.id, role)
   }
 }

@@ -3,18 +3,18 @@ export type NavigationInput = {
   accessCode?: string;
 };
 
-// Função responsável por determinar a próxima rota de navegação com base na autenticação e código de acesso
 export function computeNextRoute({ isAuthenticated, accessCode }: NavigationInput): string {
+  // Verifica se o código de acesso é válido
   const isValidCode = !!accessCode && /^\d{9}$/.test(accessCode);
-  // Usuário autenticado e código válido: direciona para dashboard
   if (isAuthenticated && isValidCode) {
+    // Usuário autenticado e código válido
     return '/(authenticated)/(tabs)/dashboard';
   }
-  // Usuário autenticado sem código válido: direciona para colaborador
   if (isAuthenticated) {
+    // Usuário autenticado sem código válido
     return '/(authenticated)/standalone/collaborator';
   }
-  // Não autenticado: direciona para tela inicial
+  // Usuário não autenticado
   return '/';
 }
 
