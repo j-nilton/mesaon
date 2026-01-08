@@ -10,12 +10,14 @@ export interface RecoverPasswordViewModel {
   submit: () => Promise<boolean>;
 }
 
+// Implementação do ViewModel de recuperação de senha
 export function useRecoverPasswordViewModel(uc: RecoverPasswordUseCase): RecoverPasswordViewModel {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const canSubmit = /\S+@\S+\.\S+/.test(email)
 
+  // Realiza a recuperação de senha
   const submit = async (): Promise<boolean> => {
     setIsLoading(true)
     setErrorMessage('')
