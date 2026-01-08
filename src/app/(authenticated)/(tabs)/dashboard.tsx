@@ -15,6 +15,7 @@ export default function DashboardScreen() {
   const [query, setQuery] = useState('')
   const [showMenu, setShowMenu] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | undefined>(undefined)
+  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | undefined>(undefined)
   const [showFab, setShowFab] = useState(true)
   const [editOpen, setEditOpen] = useState(false)
   const [editId, setEditId] = useState<string | undefined>(undefined)
@@ -186,7 +187,11 @@ export default function DashboardScreen() {
                             {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.total || 0)}
                           </Text>
                         </View>
-                        <Pressable onPress={() => setOpenMenuId(prev => (prev === t.id ? undefined : t.id))}>
+                        <Pressable onPress={(e) => {
+                          const { pageX, pageY } = e.nativeEvent
+                          setMenuPosition({ top: pageY, right: width - pageX })
+                          setOpenMenuId(prev => (prev === t.id ? undefined : t.id))
+                        }}>
                           <Ionicons name="ellipsis-vertical" size={18} color={colors.text.secondary} />
                         </Pressable>
                       </View>
@@ -200,8 +205,8 @@ export default function DashboardScreen() {
       )}
       {openMenuId && (
         <>
-          <Pressable style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 10 }} onPress={() => setOpenMenuId(undefined)} />
-          <View style={[styles.kebabMenu, { zIndex: 11 }]}>
+          <Pressable style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 2000 }} onPress={() => setOpenMenuId(undefined)} />
+          <View style={[styles.kebabMenu, { zIndex: 2001, top: menuPosition?.top, right: menuPosition?.right }]}>
             <Pressable
               onPress={() => {
                 const t = vm.tables.find(tbl => tbl.id === openMenuId)

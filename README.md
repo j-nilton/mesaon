@@ -1,7 +1,7 @@
 # MesaOn - Gerenciador de Pedidos
 
 <p align="center">
-  <img src="assets/logoMesaOn.png" alt="Logo do MesaOn" width="350">
+  <img src="assets/logoMesaOn.png" alt="Logo do MesaOn" width="300">
 </p>
 
 ## Descrição
@@ -37,14 +37,14 @@ O projeto adota uma arquitetura **MVVM (Model-View-ViewModel)** com princípios 
 
 ## Pré-requisitos
 
-- Node.js (versão 18 ou superior)
+- Node.js
 - npm ou Yarn
 - Expo CLI
 
 ## Como baixar o projeto
 
 ```bash
-git clone https://github.com/seu-usuario/mesaon.git
+git clone https://github.com/j-nilton/mesaon.git
 cd mesaon
 ```
 
@@ -68,7 +68,7 @@ Para iniciar o ambiente de desenvolvimento, execute o seguinte comando:
 npx expo start
 ```
 
-Isso iniciará o Metro Bundler. Você pode então escanear o QR code com o aplicativo Expo Go em seu dispositivo móvel (Android ou iOS) ou rodar em um emulador.
+Isso iniciará o Metro Bundler. Você pode então escanear o QR code com o aplicativo Expo Go em seu dispositivo móvel (Android) ou rodar em um emulador.
 
 ## Estrutura do projeto (pastas)
 
@@ -82,6 +82,5 @@ Isso iniciará o Metro Bundler. Você pode então escanear o QR code com o aplic
 │   ├── model             # Camada de domínio
 │   ├── usecase           # Casos de uso
 │   └── viewmodel         # Camada de ViewModel
-├── .env.example          # Exemplo de variáveis de ambiente
 └── package.json          # Dependências e scripts do projeto
 ```

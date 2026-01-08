@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Animated,
+  Easing,
+  Pressable
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useRegisterViewModel } from "../viewmodel/RegisterViewModel";
@@ -14,9 +17,48 @@ import { container } from "../di/container";
 import { colors, typography } from "./theme/theme";
 import { Input } from "./components/Input";
 import { Button } from "./components/Button";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function RegisterScreen() {
   const viewModel = useRegisterViewModel(container.getRegisterUseCase());
+  const [showTooltip, setShowTooltip] = useState<string | null>(null);
+
+  // Animation values
+  const strengthAnim = useRef(new Animated.Value(0)).current;
+
+  // Calculate numeric strength (0-4) based on rules passed
+  const rulesMet = useMemo(() => {
+    const { length, upper, lower, number } = viewModel.passwordRules;
+    return [length, upper, lower, number].filter(Boolean).length;
+  }, [viewModel.passwordRules]);
+
+  useEffect(() => {
+    Animated.timing(strengthAnim, {
+      toValue: rulesMet,
+      duration: 300,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false, // width/color interpolation doesn't support native driver
+    }).start();
+  }, [rulesMet]);
+
+  const barColor = strengthAnim.interpolate({
+    inputRange: [0, 1, 2, 3, 4],
+    outputRange: [colors.border, colors.status.error, colors.status.warning, "#87D37C", colors.status.success]
+  });
+
+  const barWidth = strengthAnim.interpolate({
+    inputRange: [0, 4],
+    outputRange: ["0%", "100%"]
+  });
+
+  const renderRequirementIcon = (met: boolean, icon: keyof typeof Ionicons.glyphMap, label: string) => (
+    <Pressable 
+      onPress={() => setShowTooltip(label)}
+      style={({ pressed }) => [styles.reqIcon, { opacity: pressed ? 0.7 : 1, backgroundColor: met ? colors.status.success + '20' : colors.status.error + '10' }]}
+    >
+      <Ionicons name={icon} size={16} color={met ? colors.status.success : colors.status.error} />
+    </Pressable>
+  );
 
   return (
     <KeyboardAvoidingView
@@ -64,12 +106,29 @@ export default function RegisterScreen() {
             onChangeText={viewModel.setPassword}
             isPassword
           />
-          <View style={{ marginTop: 8 }}>
-            <Text style={[styles.passwordHint, viewModel.passwordRules.length ? styles.passOk : styles.passBad]}>• Mínimo de 8 caracteres</Text>
-            <Text style={[styles.passwordHint, viewModel.passwordRules.upper ? styles.passOk : styles.passBad]}>• Contém letra maiúscula</Text>
-            <Text style={[styles.passwordHint, viewModel.passwordRules.lower ? styles.passOk : styles.passBad]}>• Contém letra minúscula</Text>
-            <Text style={[styles.passwordHint, viewModel.passwordRules.number ? styles.passOk : styles.passBad]}>• Contém número</Text>
-            <Text style={styles.strengthText}>Força da senha: {viewModel.strength}</Text>
+          
+          <View style={styles.strengthContainer}>
+            <View style={styles.strengthHeader}>
+              <Text style={styles.strengthLabel}>Força da senha</Text>
+              <Text style={[styles.strengthValue, { color: rulesMet === 4 ? colors.status.success : rulesMet > 1 ? colors.status.warning : colors.text.secondary }]}>
+                {rulesMet === 4 ? 'Forte' : rulesMet > 2 ? 'Média' : 'Fraca'}
+              </Text>
+            </View>
+            
+            <View style={styles.progressBarBg}>
+              <Animated.View style={[styles.progressBarFill, { width: barWidth, backgroundColor: barColor }]} />
+            </View>
+
+            <View style={styles.requirementsRow}>
+              {renderRequirementIcon(viewModel.passwordRules.length, "resize", "Mínimo 8 caracteres")}
+              {renderRequirementIcon(viewModel.passwordRules.upper, "text", "Letra maiúscula")}
+              {renderRequirementIcon(viewModel.passwordRules.lower, "text-outline", "Letra minúscula")}
+              {renderRequirementIcon(viewModel.passwordRules.number, "calculator", "Número")}
+            </View>
+            
+            {showTooltip && (
+               <Text style={styles.tooltipText}>{showTooltip}</Text>
+            )}
           </View>
 
           <Input
@@ -150,10 +209,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 16,
   },
-  passwordHint: { fontSize: typography.size.sm, color: colors.text.secondary },
-  passOk: { color: colors.status.success },
-  passBad: { color: colors.status.error },
-  strengthText: { marginTop: 4, fontWeight: '600', color: colors.text.primary },
+  strengthContainer: { marginTop: -5, marginBottom: 10 },
+  strengthHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
+  strengthLabel: { fontSize: typography.size.sm, color: colors.text.secondary },
+  strengthValue: { fontSize: typography.size.sm, fontWeight: 'bold' },
+  progressBarBg: { height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden', marginBottom: 8 },
+  progressBarFill: { height: '100%', borderRadius: 2 },
+  requirementsRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+  reqIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  tooltipText: { marginTop: 8, fontSize: typography.size.sm, color: colors.text.secondary, textAlign: 'center', fontStyle: 'italic' },
   registerButton: {
     marginTop: 16,
   },
