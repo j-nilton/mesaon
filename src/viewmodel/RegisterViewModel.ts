@@ -38,6 +38,8 @@ export const validatePasswordInput = (value: string): string => {
   return '';
 };
 
+
+// Interface do ViewModel de cadastro
 export interface RegisterViewModel {
   name: string;
   setName: (v: string) => void;
@@ -60,6 +62,8 @@ export interface RegisterViewModel {
   checkVerification: () => Promise<void>;
 }
 
+
+// Implementação do ViewModel de cadastro
 export function useRegisterViewModel(
   registerUseCase: RegisterUseCase,
   resendUseCase: ResendVerificationEmailUseCase,
@@ -81,6 +85,8 @@ export function useRegisterViewModel(
     lower: false,
     number: false,
   });
+
+  // Calcula a força da senha
   const strength = (() => {
     const count = Object.values(passwordRules).filter(Boolean).length;
     if (count <= 2) return 'Fraca';
@@ -88,6 +94,7 @@ export function useRegisterViewModel(
     return 'Forte';
   })();
 
+  // Atualiza a senha
   const setPassword = (value: string): void => {
     const error = validatePasswordInput(value);
     setPasswordError(error);
@@ -103,16 +110,19 @@ export function useRegisterViewModel(
     _setConfirmPassword(value);
   };
 
+  // Realiza o cadastro
   const handleRegister = async (): Promise<void> => {
     setIsLoading(true);
     setErrorMessage('');
 
+    // Validação de campos
     if (passwordError) {
       setErrorMessage(passwordError);
       setIsLoading(false);
       return;
     }
 
+    // Validação de e-mail
     const trimmedEmail = email.trim();
     if (!isValidEmail(trimmedEmail)) {
       setErrorMessage('Por favor, insira um e-mail válido.');
@@ -120,12 +130,14 @@ export function useRegisterViewModel(
       return;
     }
 
+    // Validação de senhas
     if (password !== confirmPassword) {
       setErrorMessage('As senhas não coincidem.');
       setIsLoading(false);
       return;
     }
 
+    // Verifica força da senha
     // Allow Medium or Strong passwords
     // Medium requires at least 8 chars + numbers + (upper OR lower)
     const isMediumOrBetter = checkPasswordRequirements(passwordRules);
@@ -147,6 +159,7 @@ export function useRegisterViewModel(
     }
   };
 
+  // Reenvia e-mail de verificação
   const handleResendEmail = async (): Promise<void> => {
     if (resendCooldown > 0) return;
     setIsLoading(true);
@@ -170,6 +183,7 @@ export function useRegisterViewModel(
     }
   };
 
+  // Verifica verificação de e-mail
   const checkVerification = async (): Promise<void> => {
     setIsLoading(true);
     setErrorMessage('');
@@ -189,6 +203,7 @@ export function useRegisterViewModel(
     }
   };
 
+  // Navega para tela de login
   const navigateToLogin = (): void => {
     router.back();
   };
