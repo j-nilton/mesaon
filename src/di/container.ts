@@ -19,6 +19,7 @@ import { CreateTableUseCase } from '../usecase/CreateTableUseCase'
 import { GetTableByIdUseCase } from '../usecase/GetTableByIdUseCase'
 import { UpdateTableUseCase } from '../usecase/UpdateTableUseCase'
 import { DeleteTableUseCase } from '../usecase/DeleteTableUseCase'
+import { SubscribeTablesByCodeUseCase } from '../usecase/SubscribeTablesByCodeUseCase'
 import { RecoverPasswordUseCase } from '../usecase/RecoverPasswordUseCase'
 
 // Singleton simples para Injeção de Dependência
@@ -78,6 +79,9 @@ class DIContainer {
   }
   static getListTablesByCodeUseCase(): ListTablesByCodeUseCase {
     return new ListTablesByCodeUseCase(this._tableService)
+  }
+  static getSubscribeTablesByCodeUseCase(): SubscribeTablesByCodeUseCase {
+    return new SubscribeTablesByCodeUseCase(this._tableService)
   }
   static getCreateTableUseCase(): CreateTableUseCase {
     return new CreateTableUseCase(this._tableService, this._authService)

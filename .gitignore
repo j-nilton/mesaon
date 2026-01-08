@@ -7,6 +7,8 @@ CHANGELOG.md
 android/app/google-services.json
 src/infra/services/firebase/
 .env
+coverage/
+android/
 
 # Expo
 .expo/

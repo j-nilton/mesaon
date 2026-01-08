@@ -6,4 +6,5 @@ export interface TableService {
   getById(id: string): Promise<Table | null>
   update(id: string, changes: Partial<Omit<Table, 'id' | 'accessCode' | 'createdAt'>>): Promise<Table>
   delete(id: string): Promise<void>
+  subscribeByAccessCode(accessCode: string, onChange: (items: Table[]) => void): () => void
 }

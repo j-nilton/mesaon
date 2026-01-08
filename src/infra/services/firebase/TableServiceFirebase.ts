@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc, deleteDoc } from 'firebase/firestore'
+import { collection, addDoc, getDocs, query, where, getDoc, doc, updateDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
 import { firestore } from './config'
 import { Table, TableOrder } from '../../../model/entities/Table'
 import { TableService } from '../../../model/services/TableService'
@@ -45,5 +45,16 @@ export class TableServiceFirebase implements TableService {
   async delete(id: string): Promise<void> {
     const ref = doc(firestore, 'tables', id)
     await deleteDoc(ref)
+  }
+
+  subscribeByAccessCode(accessCode: string, onChange: (items: Table[]) => void): () => void {
+    const col = collection(firestore, 'tables')
+    const q = query(col, where('accessCode', '==', accessCode))
+    const unsub = onSnapshot(q, (snapshot) => {
+      const items = snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Table[]
+      const sorted = items.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+      onChange(sorted)
+    })
+    return unsub
   }
 }

@@ -64,33 +64,34 @@ export default function TableDetailsScreen() {
 
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Pedidos</Text>
-        <Pressable
-          onPress={() => vm.setShowAddModal(true)}
-          style={({ pressed }) => [
-            styles.addBtn,
-            { opacity: pressed ? 0.8 : 1 },
-          ]}
-        >
-          <Ionicons name="add" size={20} color={colors.text.inverted} />
-          <Text style={styles.addBtnText}>Adicionar pedido</Text>
-        </Pressable>
-      </View>
-      <View style={{ paddingHorizontal: 4, paddingTop: 8 }}>
-        <Pressable
-          onPress={vm.release}
-          style={({ pressed }) => [
-            styles.secondaryBtn,
-            {
-              borderColor: colors.primary,
-              backgroundColor: "#FFF",
-              opacity: pressed ? 0.8 : 1,
-            },
-          ]}
-        >
-          <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>
-            Liberar Mesa
-          </Text>
-        </Pressable>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+          <Pressable
+            onPress={vm.release}
+            style={({ pressed }) => [
+              styles.addBtn,
+              {
+                backgroundColor: "#FFF",
+                borderColor: colors.primary,
+                borderWidth: 1,
+                opacity: pressed ? 0.8 : 1,
+              },
+            ]}
+          >
+            <Text style={[styles.addBtnText, { color: colors.primary }]}>
+              Liberar Mesa
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => vm.setShowAddModal(true)}
+            style={({ pressed }) => [
+              styles.addBtn,
+              { opacity: pressed ? 0.8 : 1 },
+            ]}
+          >
+            <Ionicons name="add" size={20} color={colors.text.inverted} />
+            <Text style={styles.addBtnText}>Adicionar pedido</Text>
+          </Pressable>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.listContainer}>

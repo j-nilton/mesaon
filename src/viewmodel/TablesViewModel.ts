@@ -10,7 +10,8 @@ export function useTablesViewModel(
   createUC: CreateTableUseCase,
   updateUC: UpdateTableUseCase,
   deleteUC: DeleteTableUseCase,
-  accessCode?: string
+  accessCode?: string,
+  subscribeUC?: { execute: (code: string, onChange: (items: Table[]) => void) => () => void }
 ) {
   const [tables, setTables] = useState<Table[]>([])
   const [loading, setLoading] = useState(false)
@@ -36,13 +37,24 @@ export function useTablesViewModel(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessCode])
   useEffect(() => {
-    if (!accessCode) return
-    const id = setInterval(() => {
-      refresh()
-    }, 5000)
-    return () => clearInterval(id)
+    if (!accessCode || !subscribeUC) return
+    let unsub: (() => void) | undefined
+    try {
+      unsub = subscribeUC.execute(accessCode, (items) => {
+        setTables(items)
+      })
+    } catch {
+      // fallback: polling
+      const id = setInterval(() => {
+        refresh()
+      }, 4000)
+      return () => clearInterval(id)
+    }
+    return () => {
+      if (unsub) unsub()
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessCode])
+  }, [accessCode, subscribeUC])
 
   const refresh = async () => {
     if (!accessCode) return
@@ -95,7 +107,7 @@ export function useTablesViewModel(
     }
   }
 
-  const canCreate = useMemo(() => !!nameInput.trim() && /^\d{9}$/.test(accessCode || ''), [nameInput, accessCode])
+  const canCreate = useMemo(() => !!nameInput.trim(), [nameInput])
 
   return {
     tables,

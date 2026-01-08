@@ -32,7 +32,8 @@ export default function DashboardScreen() {
     container.getCreateTableUseCase(),
     container.getUpdateTableUseCase(),
     container.getDeleteTableUseCase(),
-    accessCode
+    accessCode,
+    container.getSubscribeTablesByCodeUseCase()
   )
   const createVM = useCreateTableViewModel(container.getCreateTableUseCase(), accessCode)
   const formattedCode = accessCode ? `${accessCode.slice(0,3)} - ${accessCode.slice(3,6)} - ${accessCode.slice(6,9)}` : undefined
@@ -67,9 +68,24 @@ export default function DashboardScreen() {
       useNativeDriver: true,
     }).start()
   }, [createVM.isOpen])
+  const queryDebounce = React.useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingClear = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
     setShowMenu(false)
+    if (pendingClear.current) {
+      clearTimeout(pendingClear.current)
+      pendingClear.current = null
+    }
+    pendingClear.current = setTimeout(() => {
+      setQuery('')
+    }, 250)
   }, [pathname])
+  const onQueryChange = (text: string) => {
+    if (queryDebounce.current) clearTimeout(queryDebounce.current)
+    queryDebounce.current = setTimeout(() => {
+      setQuery(text)
+    }, 120)
+  }
 
   const role = profile?.role
   return (
@@ -81,7 +97,7 @@ export default function DashboardScreen() {
             placeholder="Pesquise a mesa aqui..."
             placeholderTextColor={colors.text.secondary}
             value={query}
-            onChangeText={setQuery}
+            onChangeText={onQueryChange}
             style={{ flex: 1, color: colors.text.primary, fontSize: typography.size.md }}
           />
         </View>
@@ -124,7 +140,7 @@ export default function DashboardScreen() {
       )}
       {loading || (vm.loading && vm.tables.length === 0) ? (
         <Text style={styles.empty}>Carregando...</Text>
-      ) : role === 'organization' ? (
+      ) : (
         <View>
           <Text style={styles.title}>Mesas</Text>
           {vm.errorMessage ? <Text style={styles.error}>{vm.errorMessage}</Text> : null}
@@ -175,95 +191,66 @@ export default function DashboardScreen() {
                         </Pressable>
                       </View>
                     </View>
-                    {openMenuId === t.id && (
-                      <View style={[styles.kebabMenu]}>
-                        <Pressable
-                          onPress={() => {
-                            setEditId(t.id)
-                            setEditName(t.name)
-                            setEditWaiter(t.waiterName || '')
-                            setEditNotes(t.notes || '')
-                            setOpenMenuId(undefined)
-                            setEditOpen(true)
-                          }}
-                          style={({ pressed }) => [{ paddingVertical: 8 }, pressed ? { opacity: 0.8 } : null]}
-                        >
-                          <Text style={styles.kebabItem}>Editar dados da mesa</Text>
-                        </Pressable>
-                        <Pressable
-                          disabled={!occupied}
-                          onPress={() => {
-                            Alert.alert('Liberar mesa', `Deseja liberar "${t.name}"?`, [
-                              { text: 'Cancelar', style: 'cancel' },
-                              { text: 'Liberar', onPress: () => vm.release(t.id) },
-                            ])
-                            setOpenMenuId(undefined)
-                          }}
-                          style={({ pressed }) => [{ paddingVertical: 8, opacity: !occupied ? 0.5 : 1 }, pressed ? { opacity: 0.8 } : null]}
-                        >
-                          <Text style={styles.kebabItem}>Liberar mesa</Text>
-                        </Pressable>
-                        <Pressable
-                          onPress={() => {
-                            Alert.alert('Excluir mesa', `Excluir "${t.name}"?`, [
-                              { text: 'Cancelar', style: 'cancel' },
-                              { text: 'Excluir', style: 'destructive', onPress: () => vm.remove(t.id) },
-                            ])
-                            setOpenMenuId(undefined)
-                          }}
-                          style={({ pressed }) => [{ paddingVertical: 8 }, pressed ? { opacity: 0.8 } : null]}
-                        >
-                          <Text style={[styles.kebabItem, { color: '#B3261E' }]}>Excluir mesa</Text>
-                        </Pressable>
-                      </View>
-                    )}
                   </Pressable>
                 )
               })}
             </ScrollView>
           )}
         </View>
-      ) : (
-        <View>
-          <Text style={styles.title}>Mesas</Text>
-          {vm.tables.length === 0 ? (
-            <Text style={styles.empty}>Nenhuma mesa cadastrada</Text>
-          ) : (
-            <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 96 }]}>
-              {vm.tables.map((t, idx) => {
-                const badge = String(idx + 1).padStart(2, '0')
-                const color = idx % 2 === 0 ? '#B3261E' : '#3F6F56'
-                return (
-                  <View key={t.id} style={[styles.tableCard, { shadowOpacity: 0.15 }]}>
-                    <View style={[styles.tableRow]}>
-                      <View style={[styles.badge, { backgroundColor: color }]}>
-                        <Text style={styles.badgeText}>{badge}</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.tableTitle}>{t.name}</Text>
-                        {t.waiterName ? <Text style={styles.tableSubtitle}>{t.waiterName}</Text> : null}
-                        {t.notes ? <Text style={styles.tableNotes}>{t.notes}</Text> : null}
-                      </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <View style={styles.totalPill}>
-                          <Text style={styles.totalPillText}>
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.total || 0)}
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                )
-              })}
-            </ScrollView>
-          )}
-        </View>
       )}
-      {openMenuId ? (
-        <Pressable style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0 }} onPress={() => setOpenMenuId(undefined)} />
-      ) : null}
+      {openMenuId && (
+        <>
+          <Pressable style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 10 }} onPress={() => setOpenMenuId(undefined)} />
+          <View style={[styles.kebabMenu, { zIndex: 11 }]}>
+            <Pressable
+              onPress={() => {
+                const t = vm.tables.find(tbl => tbl.id === openMenuId)
+                if (!t) return
+                setEditId(t.id)
+                setEditName(t.name)
+                setEditWaiter(t.waiterName || '')
+                setEditNotes(t.notes || '')
+                setOpenMenuId(undefined)
+                setEditOpen(true)
+              }}
+              style={({ pressed }) => [{ paddingVertical: 8 }, pressed ? { opacity: 0.8 } : null]}
+            >
+              <Text style={styles.kebabItem}>Editar dados da mesa</Text>
+            </Pressable>
+            <Pressable
+              disabled={!vm.tables.find(t => t.id === openMenuId)?.total}
+              onPress={() => {
+                const t = vm.tables.find(tbl => tbl.id === openMenuId)
+                if (!t) return
+                Alert.alert('Liberar mesa', `Deseja liberar "${t.name}"?`, [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Liberar', onPress: () => vm.release(t.id) },
+                ])
+                setOpenMenuId(undefined)
+              }}
+              style={({ pressed }) => [{ paddingVertical: 8, opacity: !vm.tables.find(t => t.id === openMenuId)?.total ? 0.5 : 1 }, pressed ? { opacity: 0.8 } : null]}
+            >
+              <Text style={styles.kebabItem}>Liberar mesa</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                const t = vm.tables.find(tbl => tbl.id === openMenuId)
+                if (!t) return
+                Alert.alert('Excluir mesa', `Excluir "${t.name}"?`, [
+                  { text: 'Cancelar', style: 'cancel' },
+                  { text: 'Excluir', style: 'destructive', onPress: () => vm.remove(t.id) },
+                ])
+                setOpenMenuId(undefined)
+              }}
+              style={({ pressed }) => [{ paddingVertical: 8 }, pressed ? { opacity: 0.8 } : null]}
+            >
+              <Text style={[styles.kebabItem, { color: '#B3261E' }]}>Excluir mesa</Text>
+            </Pressable>
+          </View>
+        </>
+      )}
       {(() => {
-        const fabEnabled = role === 'organization' && !!accessCode && /^\d{9}$/.test(accessCode)
+        const fabEnabled = !!accessCode && /^\d{9}$/.test(accessCode)
         return (
       <Pressable
         accessibilityRole="button"

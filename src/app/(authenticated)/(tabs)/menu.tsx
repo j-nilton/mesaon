@@ -13,6 +13,7 @@ import { router, usePathname } from 'expo-router'
 export default function MenuScreen() {
   const { accessCode, role, setAccessCode, setRole } = useAppState()
   const [showMenu, setShowMenu] = useState(false)
+  const [showFab, setShowFab] = useState(true)
   const vm = useMenuViewModel(
     container.getListProductsByCodeUseCase(),
     container.getCreateProductUseCase(),
@@ -27,6 +28,9 @@ export default function MenuScreen() {
   const formattedCode = useMemo(() => (accessCode ? `${accessCode.slice(0,3)} - ${accessCode.slice(3,6)} - ${accessCode.slice(6,9)}` : undefined), [accessCode])
   const copyAnim = useRef(new Animated.Value(1)).current
   const pathname = usePathname()
+  const menuAnim = useRef(new Animated.Value(0)).current
+  const queryDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingClear = useRef<ReturnType<typeof setTimeout> | null>(null)
   const copyCode = async () => {
     if (!accessCode) return
     // Copia somente dígitos para área de transferência
@@ -43,7 +47,24 @@ export default function MenuScreen() {
   }
   useEffect(() => {
     setShowMenu(false)
+    Animated.timing(menuAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start()
+    if (pendingClear.current) {
+      clearTimeout(pendingClear.current)
+      pendingClear.current = null
+    }
+    pendingClear.current = setTimeout(() => {
+      vm.setQuery('')
+    }, 250)
   }, [pathname])
+  useEffect(() => {
+    Animated.timing(menuAnim, { toValue: showMenu ? 1 : 0, duration: 180, useNativeDriver: true }).start()
+  }, [showMenu])
+  const onQueryChange = (text: string) => {
+    if (queryDebounce.current) clearTimeout(queryDebounce.current)
+    queryDebounce.current = setTimeout(() => {
+      vm.setQuery(text)
+    }, 120)
+  }
 
   return (
     <View style={styles.container}>
@@ -54,7 +75,7 @@ export default function MenuScreen() {
             placeholder="Pesquise o produto aqui..."
             placeholderTextColor={colors.text.secondary}
             value={vm.query}
-            onChangeText={vm.setQuery}
+            onChangeText={onQueryChange}
             style={{ flex: 1, color: colors.text.primary, fontSize: typography.size.md }}
           />
         </View>
@@ -62,7 +83,7 @@ export default function MenuScreen() {
           <Ionicons name="person-circle-outline" size={36 * scale} color={colors.text.secondary} />
         </Pressable>
         {showMenu && (
-          <View style={styles.menu}>
+          <Animated.View style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0,1], outputRange: [0.98,1] }) }] }]}>
             <Pressable
               onPress={() => {
                 Alert.alert('Sair', 'Deseja realmente sair?', [
@@ -82,7 +103,7 @@ export default function MenuScreen() {
             >
               <Text style={styles.menuItem}>Sair</Text>
             </Pressable>
-          </View>
+          </Animated.View>
         )}
         {showMenu ? (
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowMenu(false)} />
@@ -112,7 +133,11 @@ export default function MenuScreen() {
       ) : vm.products.length === 0 ? (
         <Text style={styles.empty}>Sem produtos cadastrados</Text>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 4, paddingVertical: 16 }}>
+        <ScrollView contentContainerStyle={{ paddingHorizontal: 4, paddingVertical: 16 }} onScroll={(e) => {
+          const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
+          const nearBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 24
+          setShowFab(!nearBottom)
+        }} scrollEventThrottle={16}>
           {vm.products
             .slice()
             .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
@@ -157,6 +182,7 @@ export default function MenuScreen() {
         </ScrollView>
       )}
 
+      {showFab && (
       <Pressable
         accessibilityRole="button"
         disabled={!vm.fabEnabled}
@@ -172,6 +198,7 @@ export default function MenuScreen() {
       >
         <Ionicons name="add" size={24} color={colors.text.inverted} />
       </Pressable>
+      )}
 
       {!vm.fabEnabled && vm.fabDisabledReason ? (
         <View style={styles.fabTip}>
@@ -353,7 +380,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
+    zIndex: 2000,
+    elevation: 8
   },
   menuItem: { color: colors.text.primary, paddingVertical: 6 },
 })
