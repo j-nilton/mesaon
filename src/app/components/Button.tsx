@@ -67,6 +67,8 @@ export function Button({
   );
 }
 
+export default Button;
+
 const styles = StyleSheet.create({
   container: {
     height: 50,

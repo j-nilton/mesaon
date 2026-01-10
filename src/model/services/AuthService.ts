@@ -11,4 +11,6 @@ export interface AuthService {
   getUserProfile(userId: string): Promise<User | null>;
   getCodeHistory(userId: string): Promise<Array<{ code: string; at: number }>>;
   resetPassword(email: string): Promise<void>;
+  sendVerificationEmail(): Promise<void>;
+  reloadUser(): Promise<void>;
 }

@@ -4,7 +4,8 @@ import {
   signOut, 
   onAuthStateChanged,
   updateProfile,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
+  sendEmailVerification
 } from 'firebase/auth';
 import { doc, setDoc, getDoc, collection, addDoc, getDocs } from 'firebase/firestore';
 import { auth, firestore } from './config';
@@ -25,6 +26,7 @@ export class FirebaseAuthService implements AuthService {
         id: firebaseUser.uid,
         email: firebaseUser.email || '',
         name: firebaseUser.displayName || undefined,
+        emailVerified: firebaseUser.emailVerified,
       };
     } catch (error: any) {
       throw new AuthError(this.mapFirebaseError(error.code), error.code);
@@ -43,6 +45,7 @@ export class FirebaseAuthService implements AuthService {
         id: firebaseUser.uid,
         email: email,
         name: name,
+        emailVerified: firebaseUser.emailVerified,
       };
 
       await setDoc(doc(firestore, 'users', newUser.id), newUser);
@@ -66,6 +69,7 @@ export class FirebaseAuthService implements AuthService {
             id: firebaseUser.uid,
             email: firebaseUser.email || '',
             name: firebaseUser.displayName || undefined,
+            emailVerified: firebaseUser.emailVerified,
           });
         } else {
           resolve(null);
@@ -110,6 +114,29 @@ export class FirebaseAuthService implements AuthService {
       await sendPasswordResetEmail(auth, email);
     } catch (error: any) {
       throw new AuthError(this.mapFirebaseError(error.code), error.code);
+    }
+  }
+
+  async sendVerificationEmail(): Promise<void> {
+    if (auth.currentUser) {
+      try {
+        await sendEmailVerification(auth.currentUser);
+      } catch (error: any) {
+        // Ignorar erro se for porque já enviou recentemente (too-many-requests)
+        // ou tratar conforme necessidade.
+        if (error.code === 'auth/too-many-requests') {
+          throw new AuthError('Muitas tentativas. Aguarde um pouco.', error.code);
+        }
+        throw new AuthError('Erro ao enviar e-mail de verificação.', error.code);
+      }
+    } else {
+      throw new AuthError('Usuário não autenticado.', 'auth/no-user');
+    }
+  }
+
+  async reloadUser(): Promise<void> {
+    if (auth.currentUser) {
+      await auth.currentUser.reload();
     }
   }
 

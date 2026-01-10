@@ -17,6 +17,8 @@ import { TableServiceFirebase } from '../infra/services/firebase/TableServiceFir
 import { ListTablesByCodeUseCase } from '../usecase/ListTablesByCodeUseCase'
 import { CreateTableUseCase } from '../usecase/CreateTableUseCase'
 import { GetTableByIdUseCase } from '../usecase/GetTableByIdUseCase'
+import { ResendVerificationEmailUseCase } from '../usecase/ResendVerificationEmailUseCase'
+import { CheckEmailVerificationUseCase } from '../usecase/CheckEmailVerificationUseCase'
 import { UpdateTableUseCase } from '../usecase/UpdateTableUseCase'
 import { DeleteTableUseCase } from '../usecase/DeleteTableUseCase'
 import { SubscribeTablesByCodeUseCase } from '../usecase/SubscribeTablesByCodeUseCase'
@@ -35,6 +37,14 @@ class DIContainer {
 
   static getRegisterUseCase(): RegisterUseCase {
     return new RegisterUseCase(this._authService)
+  }
+
+  static getResendVerificationEmailUseCase(): ResendVerificationEmailUseCase {
+    return new ResendVerificationEmailUseCase(this._authService)
+  }
+
+  static getCheckEmailVerificationUseCase(): CheckEmailVerificationUseCase {
+    return new CheckEmailVerificationUseCase(this._authService)
   }
 
   static getAuthService(): FirebaseAuthService {

@@ -14,6 +14,8 @@ export class RegisterUseCase {
       throw new AuthError('A senha deve ter no mínimo 6 caracteres.');
     }
 
-    return this.authService.register(name, email, pass);
+    const user = await this.authService.register(name, email, pass);
+    await this.authService.sendVerificationEmail();
+    return user;
   }
 }

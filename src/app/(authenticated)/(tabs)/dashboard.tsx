@@ -8,6 +8,54 @@ import { useAppState } from '../../state/AppState'
 import * as Clipboard from 'expo-clipboard'
 import { useTablesViewModel } from '../../../viewmodel/TablesViewModel'
 import { useCreateTableViewModel } from '../../../viewmodel/CreateTableViewModel'
+import { calculateMenuPosition, shouldShowFab, Rect, handlePopupClose } from '../../../viewmodel/DashboardUtils'
+import { Table } from '../../../model/entities/Table'
+
+const TableRow = ({ 
+  table: t, 
+  idx, 
+  onOpenMenu 
+}: { 
+  table: Table, 
+  idx: number, 
+  onOpenMenu: (id: string, rect: Rect) => void 
+}) => {
+  const badge = String(idx + 1).padStart(2, '0')
+  const occupied = (t.orders?.length || 0) > 0 || (t.total || 0) > 0
+  const color = occupied ? '#B3261E' : '#3F6F56'
+  const iconRef = React.useRef<View>(null)
+
+  return (
+    <Pressable style={[styles.tableCard, { shadowOpacity: 0.15 }]} onPress={() => router.push(`/(authenticated)/standalone/tableDetails?id=${t.id}`)}>
+      <View style={[styles.tableRow]}>
+        <View style={[styles.badge, { backgroundColor: color }]}>
+          <Text style={styles.badgeText}>{badge}</Text>
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.tableTitle}>{t.name}</Text>
+          {t.waiterName ? <Text style={styles.tableSubtitle}>{t.waiterName}</Text> : null}
+          {t.notes ? <Text style={styles.tableNotes}>{t.notes}</Text> : null}
+        </View>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <View style={styles.totalPill}>
+            <Text style={styles.totalPillText}>
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.total || 0)}
+            </Text>
+          </View>
+          <View ref={iconRef} collapsable={false}>
+            <Pressable onPress={() => {
+              iconRef.current?.measure((x, y, width, height, pageX, pageY) => {
+                onOpenMenu(t.id, { x: pageX, y: pageY, width, height })
+              })
+            }} hitSlop={8}>
+              <Ionicons name="ellipsis-vertical" size={18} color={colors.text.secondary} />
+            </Pressable>
+          </View>
+        </View>
+      </View>
+    </Pressable>
+  )
+}
 
 export default function DashboardScreen() {
   const [profile, setProfile] = useState<any>(null)
@@ -15,18 +63,20 @@ export default function DashboardScreen() {
   const [query, setQuery] = useState('')
   const [showMenu, setShowMenu] = useState(false)
   const [openMenuId, setOpenMenuId] = useState<string | undefined>(undefined)
-  const [menuPosition, setMenuPosition] = useState<{ top: number; right: number } | undefined>(undefined)
+  const [menuPosition, setMenuPosition] = useState<{ top?: number; bottom?: number; right: number } | undefined>(undefined)
   const [showFab, setShowFab] = useState(true)
   const [editOpen, setEditOpen] = useState(false)
   const [editId, setEditId] = useState<string | undefined>(undefined)
   const [editName, setEditName] = useState('')
   const [editWaiter, setEditWaiter] = useState('')
   const [editNotes, setEditNotes] = useState('')
-  const { width } = useWindowDimensions()
+  const { width, height } = useWindowDimensions()
   const scale = Math.min(Math.max(width / 375, 0.9), 1.1)
   const { accessCode, setAccessCode, setRole } = useAppState()
   const copyAnim = React.useRef(new Animated.Value(1)).current
   const modalAnim = React.useRef(new Animated.Value(0)).current
+  const menuAnim = React.useRef(new Animated.Value(0)).current
+  const kebabAnim = React.useRef(new Animated.Value(0)).current
   const pathname = usePathname()
   const vm = useTablesViewModel(
     container.getListTablesByCodeUseCase(),
@@ -69,6 +119,25 @@ export default function DashboardScreen() {
       useNativeDriver: true,
     }).start()
   }, [createVM.isOpen])
+
+  useEffect(() => {
+    Animated.timing(menuAnim, {
+      toValue: showMenu ? 1 : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start()
+  }, [showMenu])
+
+  useEffect(() => {
+    Animated.timing(kebabAnim, {
+      toValue: openMenuId ? 1 : 0,
+      duration: 180,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start()
+  }, [openMenuId])
+
   const queryDebounce = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingClear = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
@@ -88,6 +157,13 @@ export default function DashboardScreen() {
     }, 120)
   }
 
+  const filteredTables = vm.tables.filter(t => {
+    const q = query.trim().toLowerCase()
+    if (!q) return true
+    const fields = [t.name, t.waiterName || '', t.notes || '']
+    return fields.some(f => f.toLowerCase().includes(q))
+  })
+
   const role = profile?.role
   return (
     <View style={[styles.container]}>
@@ -106,27 +182,30 @@ export default function DashboardScreen() {
           <Ionicons name="person-circle-outline" size={36 * scale} color={colors.text.secondary} />
         </Pressable>
         {showMenu && (
-          <View style={styles.menu}>
-            <Pressable
-              onPress={() => {
-                Alert.alert('Sair', 'Deseja realmente sair?', [
-                  { text: 'Cancelar', style: 'cancel' },
-                  {
-                    text: 'Sair',
-                    style: 'destructive',
-                    onPress: async () => {
-                      await container.getAuthService().logout()
-                      setAccessCode(undefined)
-                      setRole(undefined)
-                      router.replace('/')
+          <>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => handlePopupClose(setShowMenu)} />
+            <Animated.View style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]}>
+              <Pressable
+                onPress={() => {
+                  Alert.alert('Sair', 'Deseja realmente sair?', [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Sair',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await container.getAuthService().logout()
+                        setAccessCode(undefined)
+                        setRole(undefined)
+                        router.replace('/')
+                      },
                     },
-                  },
-                ])
-              }}
-            >
-              <Text style={styles.menuItem}>Sair</Text>
-            </Pressable>
-          </View>
+                  ])
+                }}
+              >
+                <Text style={styles.menuItem}>Sair</Text>
+              </Pressable>
+            </Animated.View>
+          </>
         )}
       </View>
       {formattedCode && (
@@ -145,60 +224,24 @@ export default function DashboardScreen() {
         <View>
           <Text style={styles.title}>Mesas</Text>
           {vm.errorMessage ? <Text style={styles.error}>{vm.errorMessage}</Text> : null}
-          {vm.tables
-            .filter(t => {
-              const q = query.trim().toLowerCase()
-              if (!q) return true
-              const fields = [t.name, t.waiterName || '', t.notes || '']
-              return fields.some(f => f.toLowerCase().includes(q))
-            }).length === 0 ? (
+          {filteredTables.length === 0 ? (
             <Text style={styles.empty}>Nenhuma mesa cadastrada</Text>
           ) : (
-            <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 180 }]} onScroll={(e) => {
+            <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 370 }]} onScroll={(e) => {
               const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
-              const nearBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 24
-              setShowFab(!nearBottom)
+              setShowFab(shouldShowFab(contentSize.height, layoutMeasurement.height, contentOffset.y))
             }} scrollEventThrottle={16}>
-              {vm.tables
-                .filter(t => {
-                  const q = query.trim().toLowerCase()
-                  if (!q) return true
-                  const fields = [t.name, t.waiterName || '', t.notes || '']
-                  return fields.some(f => f.toLowerCase().includes(q))
-                })
-                .map((t, idx) => {
-                const badge = String(idx + 1).padStart(2, '0')
-                const occupied = (t.orders?.length || 0) > 0 || (t.total || 0) > 0
-                const color = occupied ? '#B3261E' : '#3F6F56'
-                return (
-                  <Pressable key={t.id} style={[styles.tableCard, { shadowOpacity: 0.15 }]} onPress={() => router.push(`/(authenticated)/standalone/tableDetails?id=${t.id}`)}>
-                    <View style={[styles.tableRow]}>
-                      <View style={[styles.badge, { backgroundColor: color }]}>
-                        <Text style={styles.badgeText}>{badge}</Text>
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text style={styles.tableTitle}>{t.name}</Text>
-                        {t.waiterName ? <Text style={styles.tableSubtitle}>{t.waiterName}</Text> : null}
-                        {t.notes ? <Text style={styles.tableNotes}>{t.notes}</Text> : null}
-                      </View>
-                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-                        <View style={styles.totalPill}>
-                          <Text style={styles.totalPillText}>
-                            {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.total || 0)}
-                          </Text>
-                        </View>
-                        <Pressable onPress={(e) => {
-                          const { pageX, pageY } = e.nativeEvent
-                          setMenuPosition({ top: pageY, right: width - pageX })
-                          setOpenMenuId(prev => (prev === t.id ? undefined : t.id))
-                        }}>
-                          <Ionicons name="ellipsis-vertical" size={18} color={colors.text.secondary} />
-                        </Pressable>
-                      </View>
-                    </View>
-                  </Pressable>
-                )
-              })}
+              {filteredTables.map((t, idx) => (
+                  <TableRow 
+                    key={t.id} 
+                    table={t} 
+                    idx={idx} 
+                    onOpenMenu={(id, rect) => {
+                  setMenuPosition(calculateMenuPosition(rect, height, width, false))
+                  setOpenMenuId(prev => (prev === id ? undefined : id))
+                }} 
+                  />
+                ))}
             </ScrollView>
           )}
         </View>
@@ -206,7 +249,17 @@ export default function DashboardScreen() {
       {openMenuId && (
         <>
           <Pressable style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 2000 }} onPress={() => setOpenMenuId(undefined)} />
-          <View style={[styles.kebabMenu, { zIndex: 2001, top: menuPosition?.top, right: menuPosition?.right }]}>
+          <Animated.View style={[
+            styles.kebabMenu, 
+            { 
+              zIndex: 2001, 
+              top: menuPosition?.top, 
+              bottom: menuPosition?.bottom, 
+              right: menuPosition?.right,
+              opacity: kebabAnim,
+              transform: [{ scale: kebabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }]
+            }
+          ]}>
             <Pressable
               onPress={() => {
                 const t = vm.tables.find(tbl => tbl.id === openMenuId)
@@ -251,7 +304,7 @@ export default function DashboardScreen() {
             >
               <Text style={[styles.kebabItem, { color: '#B3261E' }]}>Excluir mesa</Text>
             </Pressable>
-          </View>
+          </Animated.View>
         </>
       )}
       {(() => {
@@ -493,8 +546,6 @@ const styles = StyleSheet.create({
   },
   kebabMenu: {
     position: 'absolute',
-    right: 16,
-    top: 8,
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,

@@ -12,10 +12,10 @@ export default function TabsLayout() {
           tabBarInactiveTintColor: colors.text.secondary,
           headerShown: false,
           tabBarStyle: {
-            height: 82,
+            height: 115,
             paddingTop: 4,
             paddingBottom: 12,
-            },
+          },
           tabBarItemStyle: {
             paddingVertical: 0,
             },

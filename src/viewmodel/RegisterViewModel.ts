@@ -1,14 +1,48 @@
 import { useState } from 'react';
 import { RegisterUseCase } from '../usecase/RegisterUseCase';
+import { ResendVerificationEmailUseCase } from '../usecase/ResendVerificationEmailUseCase';
+import { CheckEmailVerificationUseCase } from '../usecase/CheckEmailVerificationUseCase';
 import { router } from 'expo-router';
 
-export function useRegisterViewModel(registerUseCase: RegisterUseCase) {
+export const isValidEmail = (email: string) => {
+  // RFC 5322ish regex - robust but not perfect (perfect is impossible with regex)
+  const emailRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  if (!emailRegex.test(email)) return false;
+  
+  // Structural "DNS" check (simulated)
+  const domain = email.split('@')[1];
+  if (!domain || !domain.includes('.')) return false;
+  
+  // Reject specific invalid domains or TLDs if necessary
+  if (email.endsWith('@email.com')) return false;
+  if (email.endsWith('@example.com')) return false;
+
+  return true;
+};
+
+export const checkPasswordRequirements = (rules: { length: boolean; upper: boolean; lower: boolean; number: boolean }) => {
+  const { length, upper, lower, number } = rules;
+  // Strong: All
+  // Medium: Length + Number + (Upper OR Lower)
+  // Weak: Anything else (blocks submit)
+  
+  // We return a "score" or level, but for boolean check "isMediumOrBetter":
+  return (length && number && (upper || lower));
+};
+
+export function useRegisterViewModel(
+  registerUseCase: RegisterUseCase,
+  resendUseCase: ResendVerificationEmailUseCase,
+  checkUseCase: CheckEmailVerificationUseCase
+) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, _setPassword] = useState('');
   const [confirmPassword, _setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [verificationSent, setVerificationSent] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const [passwordRules, setPasswordRules] = useState({
     length: false,
     upper: false,
@@ -41,25 +75,75 @@ export function useRegisterViewModel(registerUseCase: RegisterUseCase) {
     setIsLoading(true);
     setErrorMessage('');
 
+    const trimmedEmail = email.trim();
+    if (!isValidEmail(trimmedEmail)) {
+      setErrorMessage('Por favor, insira um e-mail válido.');
+      setIsLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setErrorMessage('As senhas não coincidem.');
       setIsLoading(false);
       return;
     }
-    const allRulesOk = Object.values(passwordRules).every(Boolean);
-    if (!allRulesOk) {
-      setErrorMessage('A senha não atende aos requisitos mínimos.');
+
+    // Allow Medium or Strong passwords
+    // Medium requires at least 8 chars + numbers + (upper OR lower)
+    const isMediumOrBetter = checkPasswordRequirements(passwordRules);
+
+    if (!isMediumOrBetter) {
+      setErrorMessage('A senha deve ter no mínimo 8 caracteres, contendo letras e números.');
       setIsLoading(false);
       return;
     }
 
     try {
       const trimmedName = name.trim();
-      const trimmedEmail = email.trim();
       await registerUseCase.execute(trimmedName, trimmedEmail, password);
-      router.replace('/(authenticated)/standalone/collaborator');
+      setVerificationSent(true);
     } catch (error: any) {
       setErrorMessage(error.message || 'Erro ao criar conta.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (resendCooldown > 0) return;
+    setIsLoading(true);
+    setErrorMessage('');
+    try {
+      await resendUseCase.execute();
+      setResendCooldown(60);
+      const interval = setInterval(() => {
+        setResendCooldown(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    } catch (e: any) {
+      setErrorMessage(e.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkVerification = async () => {
+    setIsLoading(true);
+    setErrorMessage('');
+    try {
+      const verified = await checkUseCase.execute();
+      if (verified) {
+        router.replace('/(authenticated)/standalone/collaborator');
+      } else {
+        setErrorMessage('E-mail ainda não verificado.');
+      }
+    } catch (e: any) {
+      setErrorMessage(e.message);
     } finally {
       setIsLoading(false);
     }
@@ -79,6 +163,10 @@ export function useRegisterViewModel(registerUseCase: RegisterUseCase) {
     passwordRules,
     strength,
     handleRegister,
-    navigateToLogin
+    navigateToLogin,
+    verificationSent,
+    resendCooldown,
+    handleResendEmail,
+    checkVerification
   };
 }

@@ -7,7 +7,6 @@ import { useAppState } from '../../state/AppState'
 import { router } from 'expo-router'
 import * as Clipboard from 'expo-clipboard'
 import { Ionicons } from '@expo/vector-icons'
-// Importação do Ionicons para evitar erro de referência ao ícone de copiar
 
 export default function CollaboratorCodeStandalone() {
   const vm = useCollaboratorCodeViewModel(
@@ -103,8 +102,6 @@ export default function CollaboratorCodeStandalone() {
         </Pressable>
       </View>
 
-      {/* Rodapé de copyright conforme mock */}
-      <Text style={styles.footer}>© Todos os direitos reservados</Text>
     </KeyboardAvoidingView>
   )
 }
@@ -125,5 +122,4 @@ const styles = StyleSheet.create({
   secondaryBtnText: { color: colors.primary, fontWeight: 'bold' },
   primaryBtn: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   primaryBtnText: { color: colors.text.inverted, fontWeight: 'bold' },
-  footer: { position: 'absolute', bottom: 12, color: colors.text.secondary },
 })

@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { container } from '../../../di/container'
 import { useAppState } from '../../state/AppState'
 import { useMenuViewModel } from '../../../viewmodel/MenuViewModel'
+import { handlePopupClose } from '../../../viewmodel/DashboardUtils'
 import { ProductCategory } from '../../../model/entities/Product'
 import * as Clipboard from 'expo-clipboard'
 import { Picker } from '@react-native-picker/picker'
@@ -83,31 +84,31 @@ export default function MenuScreen() {
           <Ionicons name="person-circle-outline" size={36 * scale} color={colors.text.secondary} />
         </Pressable>
         {showMenu && (
-          <Animated.View style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0,1], outputRange: [0.98,1] }) }] }]}>
-            <Pressable
-              onPress={() => {
-                Alert.alert('Sair', 'Deseja realmente sair?', [
-                  { text: 'Cancelar', style: 'cancel' },
-                  {
-                    text: 'Sair',
-                    style: 'destructive',
-                    onPress: async () => {
-                      await container.getAuthService().logout()
-                      setAccessCode(undefined)
-                      setRole(undefined)
-                      router.replace('/')
+          <>
+            <Pressable style={StyleSheet.absoluteFill} onPress={() => handlePopupClose(setShowMenu)} />
+            <Animated.View style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0,1], outputRange: [0.98,1] }) }] }]}>
+              <Pressable
+                onPress={() => {
+                  Alert.alert('Sair', 'Deseja realmente sair?', [
+                    { text: 'Cancelar', style: 'cancel' },
+                    {
+                      text: 'Sair',
+                      style: 'destructive',
+                      onPress: async () => {
+                        await container.getAuthService().logout()
+                        setAccessCode(undefined)
+                        setRole(undefined)
+                        router.replace('/')
+                      },
                     },
-                  },
-                ])
-              }}
-            >
-              <Text style={styles.menuItem}>Sair</Text>
-            </Pressable>
-          </Animated.View>
+                  ])
+                }}
+              >
+                <Text style={styles.menuItem}>Sair</Text>
+              </Pressable>
+            </Animated.View>
+          </>
         )}
-        {showMenu ? (
-          <Pressable style={StyleSheet.absoluteFill} onPress={() => setShowMenu(false)} />
-        ) : null}
       </View>
       {formattedCode && (
         <View style={{ alignItems: 'center', marginTop: 8 }}>

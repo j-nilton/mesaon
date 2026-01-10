@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   addBtnText: { color: colors.text.inverted, fontWeight: "bold" },
-  listContainer: { paddingTop: 8, paddingBottom: 88 },
+  listContainer: { paddingTop: 8, paddingBottom: 110 },
   empty: { color: colors.text.secondary, textAlign: "center", marginTop: 16 },
   orderCard: {
     backgroundColor: colors.surface,
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    bottom: 16,
+    bottom: 60,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,

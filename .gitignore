@@ -5,7 +5,6 @@ node_modules/
 .trae/
 CHANGELOG.md
 android/app/google-services.json
-src/infra/services/firebase/
 .env
 coverage/
 android/

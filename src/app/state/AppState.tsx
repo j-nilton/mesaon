@@ -38,3 +38,5 @@ export function useAppState() {
   return ctx
 }
 
+export default AppStateProvider;
+

@@ -1,6 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
 import { TableServiceFirebase } from '@/infra/services/firebase/TableServiceFirebase'
 
+vi.mock('@/infra/services/firebase/config', () => ({
+  firestore: {}
+}))
+
 vi.mock('firebase/firestore', () => {
   const dataStore: any = {
     'id1': { orders: [{ name: 'X', price: 10, quantity: 2 }], total: 20 }

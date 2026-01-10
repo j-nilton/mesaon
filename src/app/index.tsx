@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 10,
   },
   welcomeText: {
     fontSize: typography.size.xl,

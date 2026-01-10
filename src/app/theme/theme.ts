@@ -33,3 +33,5 @@ export const typography = {
     xxl: 32,
   },
 };
+
+export default { colors, typography };

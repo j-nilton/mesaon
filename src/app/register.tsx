@@ -20,8 +20,21 @@ import { Button } from "./components/Button";
 import { Ionicons } from "@expo/vector-icons";
 
 export default function RegisterScreen() {
-  const viewModel = useRegisterViewModel(container.getRegisterUseCase());
+  const viewModel = useRegisterViewModel(
+    container.getRegisterUseCase(),
+    container.getResendVerificationEmailUseCase(),
+    container.getCheckEmailVerificationUseCase()
+  );
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (viewModel.verificationSent) {
+      const interval = setInterval(() => {
+        viewModel.checkVerification();
+      }, 10000);
+      return () => clearInterval(interval);
+    }
+  }, [viewModel.verificationSent]);
 
   // Animation values
   const strengthAnim = useRef(new Animated.Value(0)).current;
@@ -37,7 +50,7 @@ export default function RegisterScreen() {
       toValue: rulesMet,
       duration: 300,
       easing: Easing.out(Easing.cubic),
-      useNativeDriver: false, // width/color interpolation doesn't support native driver
+      useNativeDriver: false,
     }).start();
   }, [rulesMet]);
 
@@ -59,6 +72,46 @@ export default function RegisterScreen() {
       <Ionicons name={icon} size={16} color={met ? colors.status.success : colors.status.error} />
     </Pressable>
   );
+
+  if (viewModel.verificationSent) {
+    return (
+      <View style={styles.container}>
+        <StatusBar style="dark" />
+        <View style={[styles.scrollContent, { alignItems: 'center' }]}>
+           <Ionicons name="mail-unread-outline" size={80} color={colors.primary} style={{ marginBottom: 24 }} />
+           <Text style={styles.welcomeText}>Verifique seu e-mail</Text>
+           <Text style={[styles.actionText, { textAlign: 'center', marginBottom: 24 }]}>
+             Enviamos um link de confirmação para{'\n'}
+             <Text style={{ fontWeight: 'bold' }}>{viewModel.email}</Text>
+           </Text>
+           
+           <Text style={{ textAlign: 'center', color: colors.text.secondary, marginBottom: 32 }}>
+             Para continuar, clique no link enviado. Verifique sua caixa de e-mail ou spam.
+           </Text>
+
+           {!!viewModel.errorMessage && (
+             <Text style={styles.errorText}>{viewModel.errorMessage}</Text>
+           )}
+
+           <Button
+             title={viewModel.resendCooldown > 0 ? `Reenviar em ${viewModel.resendCooldown}s` : "Reenviar e-mail"}
+             onPress={viewModel.handleResendEmail}
+             disabled={viewModel.resendCooldown > 0}
+             loading={viewModel.isLoading}
+             variant="outline"
+             style={{ width: '100%', marginBottom: 16 }}
+           />
+           
+           <Button
+             title="Já verifiquei"
+             onPress={viewModel.checkVerification}
+             loading={viewModel.isLoading}
+             style={{ width: '100%' }}
+           />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
@@ -110,7 +163,7 @@ export default function RegisterScreen() {
           <View style={styles.strengthContainer}>
             <View style={styles.strengthHeader}>
               <Text style={styles.strengthLabel}>Força da senha</Text>
-              <Text style={[styles.strengthValue, { color: rulesMet === 4 ? colors.status.success : rulesMet > 1 ? colors.status.warning : colors.text.secondary }]}>
+              <Text style={[styles.strengthValue, { color: rulesMet === 4 ? colors.status.success : rulesMet > 2 ? colors.status.warning : colors.status.error }]}>
                 {rulesMet === 4 ? 'Forte' : rulesMet > 2 ? 'Média' : 'Fraca'}
               </Text>
             </View>
@@ -118,17 +171,6 @@ export default function RegisterScreen() {
             <View style={styles.progressBarBg}>
               <Animated.View style={[styles.progressBarFill, { width: barWidth, backgroundColor: barColor }]} />
             </View>
-
-            <View style={styles.requirementsRow}>
-              {renderRequirementIcon(viewModel.passwordRules.length, "resize", "Mínimo 8 caracteres")}
-              {renderRequirementIcon(viewModel.passwordRules.upper, "text", "Letra maiúscula")}
-              {renderRequirementIcon(viewModel.passwordRules.lower, "text-outline", "Letra minúscula")}
-              {renderRequirementIcon(viewModel.passwordRules.number, "calculator", "Número")}
-            </View>
-            
-            {showTooltip && (
-               <Text style={styles.tooltipText}>{showTooltip}</Text>
-            )}
           </View>
 
           <Input
@@ -176,7 +218,7 @@ const styles = StyleSheet.create({
   },
   header: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 10,
   },
   welcomeText: {
     fontSize: typography.size.xl,
