@@ -5,11 +5,21 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      'react-native': 'react-native-web',
     },
   },
   test: {
     globals: true,
-    environment: 'node',
+    environment: 'jsdom',
+    setupFiles: ['./src/__tests__/setup.ts'],
     include: ['src/__tests__/**/*.test.ts'],
+    server: {
+      deps: {
+        inline: ['react-native-web'],
+      },
+    },
+  },
+  define: {
+    __DEV__: true,
   },
 });

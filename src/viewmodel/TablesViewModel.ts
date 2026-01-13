@@ -14,10 +14,20 @@ export function useTablesViewModel(
   subscribeUC?: { execute: (code: string, onChange: (items: Table[]) => void) => () => void }
 ) {
   const [tables, setTables] = useState<Table[]>([])
+  const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const [nameInput, setNameInput] = useState('')
 
+  const filteredTables = useMemo(() => {
+    const q = query.trim().toLowerCase()
+    if (!q) return tables
+    return tables.filter(t => 
+      t.name.toLowerCase().includes(q) || 
+      (t.waiterName || '').toLowerCase().includes(q)
+    )
+  }, [tables, query])
+  
   const load = async () => {
     if (!accessCode) return
     setLoading(true)
@@ -110,11 +120,12 @@ export function useTablesViewModel(
   const canCreate = useMemo(() => !!nameInput.trim(), [nameInput])
 
   return {
-    tables,
+    tables: filteredTables,
     loading,
     errorMessage,
     nameInput,
     setNameInput,
+    setQuery,
     load,
     refresh,
     create,

@@ -77,6 +77,7 @@ export default function DashboardScreen() {
   const modalAnim = React.useRef(new Animated.Value(0)).current
   const menuAnim = React.useRef(new Animated.Value(0)).current
   const kebabAnim = React.useRef(new Animated.Value(0)).current
+  const queryDebounce = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const pathname = usePathname()
   const vm = useTablesViewModel(
     container.getListTablesByCodeUseCase(),
@@ -88,6 +89,15 @@ export default function DashboardScreen() {
   )
   const createVM = useCreateTableViewModel(container.getCreateTableUseCase(), accessCode)
   const formattedCode = accessCode ? `${accessCode.slice(0,3)} - ${accessCode.slice(3,6)} - ${accessCode.slice(6,9)}` : undefined
+  
+  const onQueryChange = (text: string) => {
+    if (queryDebounce.current) clearTimeout(queryDebounce.current)
+    setQuery(text) // Atualiza o estado imediatamente para o input
+    queryDebounce.current = setTimeout(() => {
+      vm.setQuery(text) // Aplica o filtro no ViewModel após o debounce
+    }, 300)
+  }
+  
   const copyCode = async () => {
     if (!accessCode) return
     await Clipboard.setStringAsync(accessCode.replace(/\D/g, ''))
@@ -138,32 +148,6 @@ export default function DashboardScreen() {
     }).start()
   }, [openMenuId])
 
-  const queryDebounce = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-  const pendingClear = React.useRef<ReturnType<typeof setTimeout> | null>(null)
-  useEffect(() => {
-    setShowMenu(false)
-    if (pendingClear.current) {
-      clearTimeout(pendingClear.current)
-      pendingClear.current = null
-    }
-    pendingClear.current = setTimeout(() => {
-      setQuery('')
-    }, 250)
-  }, [pathname])
-  const onQueryChange = (text: string) => {
-    if (queryDebounce.current) clearTimeout(queryDebounce.current)
-    queryDebounce.current = setTimeout(() => {
-      setQuery(text)
-    }, 120)
-  }
-
-  const filteredTables = vm.tables.filter(t => {
-    const q = query.trim().toLowerCase()
-    if (!q) return true
-    const fields = [t.name, t.waiterName || '', t.notes || '']
-    return fields.some(f => f.toLowerCase().includes(q))
-  })
-
   const role = profile?.role
   return (
     <View style={[styles.container]}>
@@ -171,7 +155,7 @@ export default function DashboardScreen() {
         <View style={[styles.search, { height: 44 * scale, borderRadius: 24 * scale, paddingHorizontal: 16 }]}>
           <Ionicons name="search" size={18 * scale} color={colors.text.secondary} style={{ marginRight: 8 }} />
           <TextInput
-            placeholder="Pesquise a mesa aqui..."
+            placeholder="Pesquise por nome, garçom..."
             placeholderTextColor={colors.text.secondary}
             value={query}
             onChangeText={onQueryChange}
@@ -224,14 +208,14 @@ export default function DashboardScreen() {
         <View>
           <Text style={styles.title}>Mesas</Text>
           {vm.errorMessage ? <Text style={styles.error}>{vm.errorMessage}</Text> : null}
-          {filteredTables.length === 0 ? (
+          {vm.tables.length === 0 ? (
             <Text style={styles.empty}>Nenhuma mesa cadastrada</Text>
           ) : (
             <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 370 }]} onScroll={(e) => {
               const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
               setShowFab(shouldShowFab(contentSize.height, layoutMeasurement.height, contentOffset.y))
             }} scrollEventThrottle={16}>
-              {filteredTables.map((t, idx) => (
+              {vm.tables.map((t, idx) => (
                   <TableRow 
                     key={t.id} 
                     table={t} 
@@ -338,7 +322,7 @@ export default function DashboardScreen() {
               opacity: modalAnim,
             }
           ]}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 276 }}>
               <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
                 <Text style={styles.modalTitle}>Nova Mesa</Text>
               </View>
@@ -414,7 +398,7 @@ export default function DashboardScreen() {
         <View style={styles.modalBackdrop}>
           <Pressable style={StyleSheet.absoluteFill} onPress={() => setEditOpen(false)} />
           <Animated.View style={[styles.modalCard]}>
-            <ScrollView contentContainerStyle={{ paddingBottom: 16 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 276 }}>
               <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
                 <Text style={styles.modalTitle}>Editar Mesa</Text>
               </View>

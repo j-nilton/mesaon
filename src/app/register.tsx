@@ -31,7 +31,7 @@ export default function RegisterScreen() {
     if (viewModel.verificationSent) {
       const interval = setInterval(() => {
         viewModel.checkVerification();
-      }, 10000);
+      }, 120000);
       return () => clearInterval(interval);
     }
   }, [viewModel.verificationSent]);
@@ -159,6 +159,9 @@ export default function RegisterScreen() {
             onChangeText={viewModel.setPassword}
             isPassword
           />
+          {!!viewModel.passwordError && (
+            <Text style={styles.errorText}>{viewModel.passwordError}</Text>
+          )}
           
           <View style={styles.strengthContainer}>
             <View style={styles.strengthHeader}>

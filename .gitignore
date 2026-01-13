@@ -9,6 +9,13 @@ android/app/google-services.json
 coverage/
 android/
 
+# Diagramas em formato .puml
+diagramas/arquitetura_camadas.puml
+diagramas/casos_de_uso.puml
+diagramas/classes.puml
+diagramas/componentes.puml
+diagramas/estados.puml
+
 # Expo
 .expo/
 dist/

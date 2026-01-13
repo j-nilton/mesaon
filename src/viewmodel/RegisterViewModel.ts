@@ -30,6 +30,13 @@ export const checkPasswordRequirements = (rules: { length: boolean; upper: boole
   return (length && number && (upper || lower));
 };
 
+export const validatePasswordInput = (value: string): string => {
+  if (/[^A-Za-z0-9]/.test(value)) {
+    return 'A senha deve conter apenas letras e números.';
+  }
+  return '';
+};
+
 export function useRegisterViewModel(
   registerUseCase: RegisterUseCase,
   resendUseCase: ResendVerificationEmailUseCase,
@@ -41,6 +48,7 @@ export function useRegisterViewModel(
   const [confirmPassword, _setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
   const [verificationSent, setVerificationSent] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [passwordRules, setPasswordRules] = useState({
@@ -56,24 +64,30 @@ export function useRegisterViewModel(
     return 'Forte';
   })();
 
-  const sanitize = (value: string) => value.replace(/[^A-Za-z0-9]/g, '');
   const setPassword = (value: string) => {
-    const v = sanitize(value);
-    _setPassword(v);
+    const error = validatePasswordInput(value);
+    setPasswordError(error);
+    _setPassword(value);
     setPasswordRules({
-      length: v.length >= 8,
-      upper: /[A-Z]/.test(v),
-      lower: /[a-z]/.test(v),
-      number: /[0-9]/.test(v),
+      length: value.length >= 8,
+      upper: /[A-Z]/.test(value),
+      lower: /[a-z]/.test(value),
+      number: /[0-9]/.test(value),
     });
   };
   const setConfirmPassword = (value: string) => {
-    _setConfirmPassword(sanitize(value));
+    _setConfirmPassword(value);
   };
 
   const handleRegister = async () => {
     setIsLoading(true);
     setErrorMessage('');
+
+    if (passwordError) {
+      setErrorMessage(passwordError);
+      setIsLoading(false);
+      return;
+    }
 
     const trimmedEmail = email.trim();
     if (!isValidEmail(trimmedEmail)) {
@@ -160,6 +174,7 @@ export function useRegisterViewModel(
     confirmPassword, setConfirmPassword,
     isLoading,
     errorMessage,
+    passwordError,
     passwordRules,
     strength,
     handleRegister,

@@ -16,6 +16,13 @@ MesaOn é um sistema de gerenciamento de pedidos projetado para otimizar a opera
 - **Colaboração em Tempo Real:** Compartilhe um código de acesso com sua equipe para que todos possam visualizar e gerenciar as mesas.
 - **Autenticação Segura:** Sistema de login e registro para proteger o acesso aos dados.
 
+## Diagramas
+
+- **[Casos de Uso](diagramas/casos_de_uso.png):** Descreve as interações entre os usuários e o sistema, mostrando como ele atende às necessidades.
+- **[Arquitetura](diagramas/arquitetura_camadas.png):** Representa a arquitetura do sistema, dividida em camadas (app, viewmodel, usecase, model, infra, di).
+- **[Estados](diagramas/estados.png):** Representa os estados possíveis do sistema e as transições entre eles.
+- **[Classes](diagramas/classes.png):** Define as classes principais do domínio, seus atributos e métodos.
+
 ## Arquitetura utilizada
 
 O projeto adota uma arquitetura **MVVM (Model-View-ViewModel)** com princípios de **Clean Architecture**. Essa abordagem garante uma separação clara de responsabilidades, alta testabilidade e escalabilidade. As camadas principais são:

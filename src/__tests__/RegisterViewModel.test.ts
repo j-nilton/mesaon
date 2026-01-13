@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { isValidEmail, checkPasswordRequirements } from '@/viewmodel/RegisterViewModel'
+import { isValidEmail, checkPasswordRequirements, validatePasswordInput } from '@/viewmodel/RegisterViewModel'
 
 vi.mock('expo-router', () => ({
   router: {
@@ -8,6 +8,26 @@ vi.mock('expo-router', () => ({
     push: vi.fn(),
   },
 }))
+
+describe('RegisterViewModel Logic', () => {
+  it('deve retornar erro para caracteres inválidos', () => {
+    const result = validatePasswordInput('senha@123');
+    expect(result).toBe('A senha deve conter apenas letras e números.');
+  });
+
+  it('deve retornar string vazia para senha válida', () => {
+    const result = validatePasswordInput('senha123');
+    expect(result).toBe('');
+  });
+
+  it('deve permitir apenas letras e números', () => {
+    expect(validatePasswordInput('abc')).toBe('');
+    expect(validatePasswordInput('123')).toBe('');
+    expect(validatePasswordInput('ABC')).toBe('');
+    expect(validatePasswordInput('a b')).toBe('A senha deve conter apenas letras e números.'); // espaço
+    expect(validatePasswordInput('a-b')).toBe('A senha deve conter apenas letras e números.'); // traço
+  });
+});
 
 describe('RegisterViewModel Validation', () => {
   describe('isValidEmail', () => {

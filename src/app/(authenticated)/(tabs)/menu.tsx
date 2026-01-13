@@ -32,6 +32,7 @@ export default function MenuScreen() {
   const menuAnim = useRef(new Animated.Value(0)).current
   const queryDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingClear = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [query, setQuery] = useState('')
   const copyCode = async () => {
     if (!accessCode) return
     // Copia somente dígitos para área de transferência
@@ -55,6 +56,7 @@ export default function MenuScreen() {
     }
     pendingClear.current = setTimeout(() => {
       vm.setQuery('')
+      setQuery('')
     }, 250)
   }, [pathname])
   useEffect(() => {
@@ -62,9 +64,10 @@ export default function MenuScreen() {
   }, [showMenu])
   const onQueryChange = (text: string) => {
     if (queryDebounce.current) clearTimeout(queryDebounce.current)
+    setQuery(text)
     queryDebounce.current = setTimeout(() => {
       vm.setQuery(text)
-    }, 120)
+    }, 300)
   }
 
   return (
@@ -75,7 +78,7 @@ export default function MenuScreen() {
           <TextInput
             placeholder="Pesquise o produto aqui..."
             placeholderTextColor={colors.text.secondary}
-            value={vm.query}
+            value={query}
             onChangeText={onQueryChange}
             style={{ flex: 1, color: colors.text.primary, fontSize: typography.size.md }}
           />
@@ -354,7 +357,7 @@ const styles = StyleSheet.create({
   fabTipText: { color: colors.text.secondary, fontSize: typography.size.sm },
   // estilos duplicados removidos
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'flex-end' },
-  modalCard: { backgroundColor: colors.background, borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 16 },
+  modalCard: { backgroundColor: colors.background, borderTopLeftRadius: 16, borderTopRightRadius: 16, paddingBottom: 276 },
   modalTitle: { fontSize: typography.size.lg, fontWeight: 'bold', color: colors.text.primary },
   label: { color: colors.text.secondary, marginBottom: 6 },
   inputBox: { backgroundColor: '#EDEAE4', borderColor: colors.border, borderWidth: 1, borderRadius: 8 },
