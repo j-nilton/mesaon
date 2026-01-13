@@ -8,6 +8,14 @@
 
 MesaOn é um sistema de gerenciamento de pedidos projetado para otimizar a operação em restaurantes, bares e estabelecimentos similares. Ele permite que os funcionários gerenciem mesas, registrem pedidos e acompanhem o total da conta em tempo real, tudo a partir de um dispositivo móvel.
 
+## Integrantes da equipe TypeDevs
+
+- **Francisnilto dos Santos Nascimento** - 2024116TADS0012
+- **José Gilson Araújo Rebouçasn** - 2024116TADS0041
+- **José Nilton Silva Lima** - 2024116TADS0033
+- **Pedro Henrique Valentino Silva Sousa** - 2024116TADS0013
+- **Rodrigo Cardoso de Farias** - 2024116TADS0038
+
 ## Principais funcionalidades
 
 - **Gerenciamento de Mesas:** Crie, edite e visualize o status de todas as mesas do estabelecimento.
