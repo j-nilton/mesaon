@@ -2,14 +2,27 @@ import { useState } from 'react';
 import { LoginUseCase } from '../usecase/LoginUseCase';
 import { router } from 'expo-router';
 
-export function useLoginViewModel(loginUseCase: LoginUseCase) {
+export interface LoginViewModel {
+  email: string;
+  setEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+  isLoading: boolean;
+  errorMessage: string;
+  showPassword: boolean;
+  toggleShowPassword: () => void;
+  handleLogin: () => Promise<void>;
+  navigateToRegister: () => void;
+}
+
+export function useLoginViewModel(loginUseCase: LoginUseCase): LoginViewModel {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
+  const handleLogin = async (): Promise<void> => {
     setIsLoading(true);
     setErrorMessage('');
 
@@ -26,7 +39,7 @@ export function useLoginViewModel(loginUseCase: LoginUseCase) {
     }
   };
 
-  const navigateToRegister = () => {
+  const navigateToRegister = (): void => {
     router.push('/register');
   };
 
@@ -38,7 +51,7 @@ export function useLoginViewModel(loginUseCase: LoginUseCase) {
     isLoading,
     errorMessage,
     showPassword,
-    toggleShowPassword: () => setShowPassword(!showPassword),
+    toggleShowPassword: (): void => setShowPassword(!showPassword),
     handleLogin,
     navigateToRegister,
   };

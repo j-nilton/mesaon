@@ -5,6 +5,21 @@ import { UpdateTableUseCase } from '../usecase/UpdateTableUseCase'
 import { DeleteTableUseCase } from '../usecase/DeleteTableUseCase'
 import { Table } from '../model/entities/Table'
 
+export interface TablesViewModel {
+  tables: Table[];
+  loading: boolean;
+  errorMessage: string;
+  nameInput: string;
+  setNameInput: (v: string) => void;
+  setQuery: (v: string) => void;
+  load: () => Promise<void>;
+  refresh: () => Promise<void>;
+  create: () => Promise<void>;
+  release: (id: string) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  canCreate: boolean;
+}
+
 export function useTablesViewModel(
   listUC: ListTablesByCodeUseCase,
   createUC: CreateTableUseCase,
@@ -12,7 +27,7 @@ export function useTablesViewModel(
   deleteUC: DeleteTableUseCase,
   accessCode?: string,
   subscribeUC?: { execute: (code: string, onChange: (items: Table[]) => void) => () => void }
-) {
+): TablesViewModel {
   const [tables, setTables] = useState<Table[]>([])
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
@@ -28,7 +43,7 @@ export function useTablesViewModel(
     )
   }, [tables, query])
   
-  const load = async () => {
+  const load = async (): Promise<void> => {
     if (!accessCode) return
     setLoading(true)
     setErrorMessage('')
@@ -66,7 +81,7 @@ export function useTablesViewModel(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessCode, subscribeUC])
 
-  const refresh = async () => {
+  const refresh = async (): Promise<void> => {
     if (!accessCode) return
     try {
       const items = await listUC.execute(accessCode)
@@ -76,7 +91,7 @@ export function useTablesViewModel(
     }
   }
 
-  const create = async () => {
+  const create = async (): Promise<void> => {
     if (!accessCode) return
     setLoading(true)
     setErrorMessage('')
@@ -91,7 +106,7 @@ export function useTablesViewModel(
     }
   }
 
-  const release = async (id: string) => {
+  const release = async (id: string): Promise<void> => {
     setLoading(true)
     setErrorMessage('')
     try {
@@ -104,7 +119,7 @@ export function useTablesViewModel(
     }
   }
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<void> => {
     setLoading(true)
     setErrorMessage('')
     try {

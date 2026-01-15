@@ -2,7 +2,27 @@ import { useState } from 'react'
 import { CreateTableUseCase } from '../usecase/CreateTableUseCase'
 import { TableOrder } from '../model/entities/Table'
 
-export function useCreateTableViewModel(createUC: CreateTableUseCase, accessCode?: string) {
+export interface CreateTableViewModel {
+  name: string;
+  setName: (v: string) => void;
+  waiterName: string;
+  setWaiterName: (v: string) => void;
+  notes: string;
+  setNotes: (v: string) => void;
+  orders: TableOrder[];
+  addOrder: (o: Omit<TableOrder, 'id'>) => void;
+  removeOrder: (id: string) => void;
+  isOpen: boolean;
+  open: () => void;
+  close: () => void;
+  isLoading: boolean;
+  errorMessage: string;
+  total: number;
+  canSubmit: boolean;
+  submit: () => Promise<import('../model/entities/Table').Table | undefined>;
+}
+
+export function useCreateTableViewModel(createUC: CreateTableUseCase, accessCode?: string): CreateTableViewModel {
   const [name, setName] = useState('')
   const [waiterName, setWaiterName] = useState('')
   const [notes, setNotes] = useState('')
@@ -11,14 +31,14 @@ export function useCreateTableViewModel(createUC: CreateTableUseCase, accessCode
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const addOrder = (o: Omit<TableOrder, 'id'>) => {
+  const addOrder = (o: Omit<TableOrder, 'id'>): void => {
     const id = Math.random().toString(36).slice(2, 8)
     setOrders(prev => [...prev, { id, ...o }])
   }
-  const removeOrder = (id: string) => setOrders(prev => prev.filter(x => x.id !== id))
+  const removeOrder = (id: string): void => setOrders(prev => prev.filter(x => x.id !== id))
 
-  const open = () => setIsOpen(true)
-  const close = () => {
+  const open = (): void => setIsOpen(true)
+  const close = (): void => {
     setIsOpen(false)
     setErrorMessage('')
   }
@@ -26,7 +46,7 @@ export function useCreateTableViewModel(createUC: CreateTableUseCase, accessCode
   const total = orders.reduce((acc, it) => acc + it.price * it.quantity, 0)
   const canSubmit = !!accessCode && /^\d{9}$/.test(accessCode) && !!name.trim()
 
-  const submit = async () => {
+  const submit = async (): Promise<import('../model/entities/Table').Table | undefined> => {
     if (!accessCode) return
     setIsLoading(true)
     setErrorMessage('')

@@ -11,7 +11,7 @@ export const calculateMenuPosition = (
   screenHeight: number,
   screenWidth: number,
   isLast: boolean
-) => {
+): { top?: number; bottom?: number; right: number } => {
   // Logic simplified: if it's one of the last cards, flip up. Otherwise, flip down.
   // This ensures deterministic behavior for the user.
   const isBottom = isLast
@@ -35,7 +35,7 @@ export const shouldShowFab = (
   contentHeight: number,
   layoutHeight: number,
   offsetY: number
-) => {
+): boolean => {
   // If content fits in the screen (no scroll needed), always show FAB
   if (contentHeight <= layoutHeight) return true
   
@@ -43,7 +43,7 @@ export const shouldShowFab = (
   return offsetY + layoutHeight < contentHeight - 24
 }
 
-export const handlePopupClose = (setOpen: (v: boolean) => void, delay: number = 100) => {
+export const handlePopupClose = (setOpen: (v: boolean) => void, delay: number = 100): void => {
   setTimeout(() => {
     setOpen(false)
   }, delay)

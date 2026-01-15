@@ -5,12 +5,25 @@ import { GenerateAccessCodeUseCase } from '../usecase/GenerateAccessCodeUseCase'
 export type CollaboratorCodeStatus = 'idle' | 'valid' | 'invalid' | 'checking' | 'success'
 
 // Função pura para normalização que pode ser testada sem React
-export function normalizeCodeInput(v: string) {
+export function normalizeCodeInput(v: string): string {
   return v.replace(/\D/g, '').slice(0, 9)
 }
 
 // ViewModel focado no fluxo do colaborador
-export function useCollaboratorCodeViewModel(validateUC: ValidateAccessCodeUseCase, generateUC?: GenerateAccessCodeUseCase) {
+export interface CollaboratorCodeViewModel {
+  codeInput: string;
+  onChange: (v: string) => void;
+  isComplete: boolean;
+  status: CollaboratorCodeStatus;
+  errorMessage: string;
+  isLoading: boolean;
+  confirmCode: () => Promise<void>;
+  generateCode: () => Promise<void>;
+  generatedCode: string | null;
+  formatCode: (c: string) => string;
+}
+
+export function useCollaboratorCodeViewModel(validateUC: ValidateAccessCodeUseCase, generateUC?: GenerateAccessCodeUseCase): CollaboratorCodeViewModel {
   const [codeInput, setCodeInput] = useState('')
   const [status, setStatus] = useState<CollaboratorCodeStatus>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -19,7 +32,7 @@ export function useCollaboratorCodeViewModel(validateUC: ValidateAccessCodeUseCa
 
   const isComplete = useMemo(() => /^\d{9}$/.test(codeInput.replace(/\D/g, '')), [codeInput])
 
-  const onChange = (v: string) => {
+  const onChange = (v: string): void => {
     const normalized = normalizeCodeInput(v)
     setCodeInput(normalized)
     setErrorMessage('')
@@ -46,7 +59,7 @@ export function useCollaboratorCodeViewModel(validateUC: ValidateAccessCodeUseCa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [codeInput])
 
-  const confirmCode = async () => {
+  const confirmCode = async (): Promise<void> => {
     if (!isComplete) return
     setIsLoading(true)
     setErrorMessage('')
@@ -61,7 +74,7 @@ export function useCollaboratorCodeViewModel(validateUC: ValidateAccessCodeUseCa
     }
   }
 
-  const generateCode = async () => {
+  const generateCode = async (): Promise<void> => {
     if (!generateUC) return
     setIsLoading(true)
     setErrorMessage('')
@@ -77,7 +90,7 @@ export function useCollaboratorCodeViewModel(validateUC: ValidateAccessCodeUseCa
     }
   }
 
-  const formatCode = (c: string) => {
+  const formatCode = (c: string): string => {
     const s = c.replace(/\D/g, '').slice(0, 9)
     const part1 = s.slice(0, 3)
     const part2 = s.slice(3, 6)

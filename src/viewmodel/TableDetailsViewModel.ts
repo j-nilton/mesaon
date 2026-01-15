@@ -5,6 +5,24 @@ import { UpdateTableUseCase } from '../usecase/UpdateTableUseCase'
 import { DeleteTableUseCase } from '../usecase/DeleteTableUseCase'
 import { ListProductsByCodeUseCase } from '../usecase/ListProductsByCodeUseCase'
 
+export interface TableDetailsViewModel {
+  table: Table | null;
+  loading: boolean;
+  errorMessage: string;
+  orders: TableOrder[];
+  products: { id: string; name: string; price: number; category: string }[];
+  showAddModal: boolean;
+  setShowAddModal: (v: boolean) => void;
+  addOrder: (productId: string, quantity: number) => void;
+  removeOrder: (id: string) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  total: number;
+  save: () => Promise<void>;
+  release: () => Promise<void>;
+  removeTable: () => Promise<void>;
+  load: () => Promise<void>;
+}
+
 export function useTableDetailsViewModel(
   getUC: GetTableByIdUseCase,
   updateUC: UpdateTableUseCase,
@@ -12,7 +30,7 @@ export function useTableDetailsViewModel(
   listProductsUC: ListProductsByCodeUseCase,
   tableId: string,
   accessCode?: string
-) {
+): TableDetailsViewModel {
   const [table, setTable] = useState<Table | null>(null)
   const [loading, setLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
@@ -20,7 +38,7 @@ export function useTableDetailsViewModel(
   const [products, setProducts] = useState<{ id: string; name: string; price: number; category: string }[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
 
-  const load = async () => {
+  const load = async (): Promise<void> => {
     setLoading(true)
     setErrorMessage('')
     try {
@@ -43,18 +61,18 @@ export function useTableDetailsViewModel(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tableId, accessCode])
 
-  const addOrder = (productId: string, quantity: number) => {
+  const addOrder = (productId: string, quantity: number): void => {
     const p = products.find(x => x.id === productId)
     if (!p) return
     const id = Math.random().toString(36).slice(2, 8)
     setOrders(prev => [...prev, { id, name: p.name, price: p.price, quantity }])
   }
-  const removeOrder = (id: string) => setOrders(prev => prev.filter(x => x.id !== id))
-  const updateQuantity = (id: string, quantity: number) => setOrders(prev => prev.map(o => (o.id === id ? { ...o, quantity } : o)))
+  const removeOrder = (id: string): void => setOrders(prev => prev.filter(x => x.id !== id))
+  const updateQuantity = (id: string, quantity: number): void => setOrders(prev => prev.map(o => (o.id === id ? { ...o, quantity } : o)))
 
   const total = useMemo(() => orders.reduce((acc, it) => acc + it.price * it.quantity, 0), [orders])
 
-  const save = async () => {
+  const save = async (): Promise<void> => {
     if (!table) return
     setLoading(true)
     setErrorMessage('')
@@ -68,7 +86,7 @@ export function useTableDetailsViewModel(
     }
   }
 
-  const release = async () => {
+  const release = async (): Promise<void> => {
     if (!table) return
     setLoading(true)
     setErrorMessage('')
@@ -83,7 +101,7 @@ export function useTableDetailsViewModel(
     }
   }
 
-  const removeTable = async () => {
+  const removeTable = async (): Promise<void> => {
     if (!table) return
     setLoading(true)
     setErrorMessage('')

@@ -37,11 +37,33 @@ export const validatePasswordInput = (value: string): string => {
   return '';
 };
 
+export interface RegisterViewModel {
+  name: string;
+  setName: (v: string) => void;
+  email: string;
+  setEmail: (v: string) => void;
+  password: string;
+  setPassword: (v: string) => void;
+  confirmPassword: string;
+  setConfirmPassword: (v: string) => void;
+  isLoading: boolean;
+  errorMessage: string;
+  passwordError: string;
+  passwordRules: { length: boolean; upper: boolean; lower: boolean; number: boolean };
+  strength: 'Fraca' | 'Média' | 'Forte';
+  handleRegister: () => Promise<void>;
+  navigateToLogin: () => void;
+  verificationSent: boolean;
+  resendCooldown: number;
+  handleResendEmail: () => Promise<void>;
+  checkVerification: () => Promise<void>;
+}
+
 export function useRegisterViewModel(
   registerUseCase: RegisterUseCase,
   resendUseCase: ResendVerificationEmailUseCase,
   checkUseCase: CheckEmailVerificationUseCase
-) {
+): RegisterViewModel {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, _setPassword] = useState('');
@@ -64,7 +86,7 @@ export function useRegisterViewModel(
     return 'Forte';
   })();
 
-  const setPassword = (value: string) => {
+  const setPassword = (value: string): void => {
     const error = validatePasswordInput(value);
     setPasswordError(error);
     _setPassword(value);
@@ -75,11 +97,11 @@ export function useRegisterViewModel(
       number: /[0-9]/.test(value),
     });
   };
-  const setConfirmPassword = (value: string) => {
+  const setConfirmPassword = (value: string): void => {
     _setConfirmPassword(value);
   };
 
-  const handleRegister = async () => {
+  const handleRegister = async (): Promise<void> => {
     setIsLoading(true);
     setErrorMessage('');
 
@@ -123,7 +145,7 @@ export function useRegisterViewModel(
     }
   };
 
-  const handleResendEmail = async () => {
+  const handleResendEmail = async (): Promise<void> => {
     if (resendCooldown > 0) return;
     setIsLoading(true);
     setErrorMessage('');
@@ -146,7 +168,7 @@ export function useRegisterViewModel(
     }
   };
 
-  const checkVerification = async () => {
+  const checkVerification = async (): Promise<void> => {
     setIsLoading(true);
     setErrorMessage('');
     try {
@@ -163,7 +185,7 @@ export function useRegisterViewModel(
     }
   };
 
-  const navigateToLogin = () => {
+  const navigateToLogin = (): void => {
     router.back();
   };
 

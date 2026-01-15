@@ -1,13 +1,22 @@
 import { useState } from 'react'
 import { RecoverPasswordUseCase } from '../usecase/RecoverPasswordUseCase'
 
-export function useRecoverPasswordViewModel(uc: RecoverPasswordUseCase) {
+export interface RecoverPasswordViewModel {
+  email: string;
+  setEmail: (v: string) => void;
+  isLoading: boolean;
+  errorMessage: string;
+  canSubmit: boolean;
+  submit: () => Promise<boolean>;
+}
+
+export function useRecoverPasswordViewModel(uc: RecoverPasswordUseCase): RecoverPasswordViewModel {
   const [email, setEmail] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
   const canSubmit = /\S+@\S+\.\S+/.test(email)
 
-  const submit = async () => {
+  const submit = async (): Promise<boolean> => {
     setIsLoading(true)
     setErrorMessage('')
     try {

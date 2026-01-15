@@ -23,10 +23,11 @@ import { UpdateTableUseCase } from '../usecase/UpdateTableUseCase'
 import { DeleteTableUseCase } from '../usecase/DeleteTableUseCase'
 import { SubscribeTablesByCodeUseCase } from '../usecase/SubscribeTablesByCodeUseCase'
 import { RecoverPasswordUseCase } from '../usecase/RecoverPasswordUseCase'
+import { AuthService } from '../model/services/AuthService'
 
 // Singleton simples para Injeção de Dependência
 class DIContainer {
-  private static _authService = new FirebaseAuthService()
+  private static _authService: AuthService = new FirebaseAuthService()
   private static _accessCodeService = new AccessCodeServiceFirebase()
   private static _productService = new ProductServiceFirebase()
   private static _tableService = new TableServiceFirebase()
@@ -47,7 +48,7 @@ class DIContainer {
     return new CheckEmailVerificationUseCase(this._authService)
   }
 
-  static getAuthService(): FirebaseAuthService {
+  static getAuthService(): AuthService {
     return this._authService
   }
 

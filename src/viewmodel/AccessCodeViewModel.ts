@@ -4,10 +4,23 @@ import { ValidateAccessCodeUseCase } from '../usecase/ValidateAccessCodeUseCase'
 
 export type CodeStatus = 'idle' | 'valid' | 'invalid' | 'checking'
 
+export interface AccessCodeViewModel {
+  codeInput: string;
+  setCodeInput: (v: string) => void;
+  status: CodeStatus;
+  generatedCode: string | null;
+  isLoading: boolean;
+  isComplete: boolean;
+  formatCode: (c: string) => string;
+  generateCode: () => Promise<void>;
+  clearGeneratedCode: () => void;
+  confirmCode: () => Promise<void>;
+}
+
 export function useAccessCodeViewModel(
   generateUC: GenerateAccessCodeUseCase,
   validateUC: ValidateAccessCodeUseCase
-) {
+): AccessCodeViewModel {
   const [codeInput, setCodeInput] = useState('')
   const [status, setStatus] = useState<CodeStatus>('idle')
   const [generatedCode, setGeneratedCode] = useState<string | null>(null)
@@ -27,7 +40,7 @@ export function useAccessCodeViewModel(
     }
   }, [codeInput, validateUC])
 
-  const formatCode = (c: string) => {
+  const formatCode = (c: string): string => {
     const s = c.replace(/\D/g, '').slice(0, 9)
     const part1 = s.slice(0, 3)
     const part2 = s.slice(3, 6)
@@ -35,7 +48,7 @@ export function useAccessCodeViewModel(
     return [part1, part2, part3].filter(Boolean).join(' - ')
   }
 
-  const generateCode = async () => {
+  const generateCode = async (): Promise<void> => {
     setIsLoading(true)
     try {
       const org = await generateUC.execute()
@@ -45,11 +58,11 @@ export function useAccessCodeViewModel(
     }
   }
 
-  const clearGeneratedCode = () => {
+  const clearGeneratedCode = (): void => {
     setGeneratedCode(null)
   }
 
-  const confirmCode = async () => {
+  const confirmCode = async (): Promise<void> => {
     setIsLoading(true)
     try {
       await validateUC.execute(codeInput.replace(/\D/g, ''))
@@ -60,7 +73,7 @@ export function useAccessCodeViewModel(
 
   return {
     codeInput,
-    setCodeInput: (v: string) => setCodeInput(v.replace(/\D/g, '')),
+    setCodeInput: (v: string): void => setCodeInput(v.replace(/\D/g, '')),
     status,
     generatedCode,
     isLoading,

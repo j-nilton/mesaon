@@ -2,18 +2,25 @@ import { useState } from 'react'
 import { SetUserRoleUseCase } from '../usecase/SetUserRoleUseCase'
 import { router } from 'expo-router'
 
-export function useProfileSelectionViewModel(setRoleUC: SetUserRoleUseCase) {
+export interface ProfileSelectionViewModel {
+  isLoading: boolean;
+  errorMessage: string;
+  selectOrganization: () => Promise<void>;
+  selectCollaborator: () => Promise<void>;
+}
+
+export function useProfileSelectionViewModel(setRoleUC: SetUserRoleUseCase): ProfileSelectionViewModel {
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const selectOrganization = async () => {
+  const selectOrganization = async (): Promise<void> => {
     await selectRole('organization')
   }
-  const selectCollaborator = async () => {
+  const selectCollaborator = async (): Promise<void> => {
     await selectRole('collaborator')
   }
 
-  const selectRole = async (role: 'organization' | 'collaborator') => {
+  const selectRole = async (role: 'organization' | 'collaborator'): Promise<void> => {
     setIsLoading(true)
     setErrorMessage('')
     try {

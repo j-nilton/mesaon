@@ -103,17 +103,17 @@ export class FirebaseAuthService implements AuthService {
   }
 
   // Método para obter o perfil do usuário
-  async getUserProfile(userId: string) {
+  async getUserProfile(userId: string): Promise<User | null> {
     const ref = doc(firestore, 'users', userId);
     const snap = await getDoc(ref);
-    return snap.exists() ? (snap.data() as any) : null;
+    return snap.exists() ? (snap.data() as User) : null;
   }
 
   // Método para obter o histórico de códigos do usuário
   async getCodeHistory(userId: string): Promise<Array<{ code: string; at: number }>> {
     const ref = collection(firestore, 'users', userId, 'codeHistory');
     const q = await getDocs(ref);
-    return q.docs.map(d => d.data() as any);
+    return q.docs.map(d => d.data() as { code: string; at: number });
   }
 
   // Método para redefinir a senha

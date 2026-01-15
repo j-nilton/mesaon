@@ -5,11 +5,31 @@ import { UpdateProductUseCase } from '../usecase/UpdateProductUseCase'
 import { DeleteProductUseCase } from '../usecase/DeleteProductUseCase'
 import { Product, ProductCategory } from '../model/entities/Product'
 
-export function computeFabState(role?: 'organization' | 'collaborator', accessCode?: string, loading?: boolean) {
+export function computeFabState(role?: 'organization' | 'collaborator', accessCode?: string, loading?: boolean): { enabled: boolean; reason?: string } {
   const hasValidCode = !!accessCode && /^\d{9}$/.test(accessCode)
   if (loading) return { enabled: false, reason: 'Aguarde carregamento dos produtos' }
   if (!hasValidCode) return { enabled: false, reason: 'Código de acesso inválido ou ausente' }
   return { enabled: true }
+}
+
+export interface MenuViewModel {
+  products: Product[];
+  query: string;
+  setQuery: (v: string) => void;
+  category: ProductCategory;
+  setCategory: (v: ProductCategory) => void;
+  loading: boolean;
+  errorMessage: string;
+  formOpen: boolean;
+  editing: Product | null;
+  form: { name: string; description?: string; price: string; imageUrl?: string; category: ProductCategory };
+  setField: (k: keyof { name: string; description?: string; price: string; imageUrl?: string; category: ProductCategory }, v: string) => void;
+  openForm: (p?: Product) => void;
+  closeForm: () => void;
+  submit: () => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  fabEnabled: boolean;
+  fabDisabledReason?: string;
 }
 
 export function useMenuViewModel(
@@ -19,7 +39,7 @@ export function useMenuViewModel(
   deleteUC: DeleteProductUseCase,
   accessCode?: string,
   role?: 'organization' | 'collaborator' | undefined
-) {
+): MenuViewModel {
   const [products, setProducts] = useState<Product[]>([])
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<ProductCategory>('Bebidas')
@@ -49,7 +69,7 @@ export function useMenuViewModel(
     [role, accessCode, loading]
   )
 
-  const load = async () => {
+  const load = async (): Promise<void> => {
     if (!accessCode) return
     setLoading(true)
     setErrorMessage('')
@@ -68,7 +88,7 @@ export function useMenuViewModel(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessCode, category])
 
-  const openForm = (p?: Product) => {
+  const openForm = (p?: Product): void => {
     setEditing(p || null)
     setForm({
       name: p?.name || '',
@@ -79,13 +99,13 @@ export function useMenuViewModel(
     })
     setFormOpen(true)
   }
-  const closeForm = () => {
+  const closeForm = (): void => {
     setFormOpen(false)
     setEditing(null)
   }
-  const setField = (k: keyof typeof form, v: string) => setForm(prev => ({ ...prev, [k]: v }))
+  const setField = (k: keyof typeof form, v: string): void => setForm(prev => ({ ...prev, [k]: v }))
 
-  const submit = async () => {
+  const submit = async (): Promise<void> => {
     if (!accessCode) return
     setLoading(true)
     setErrorMessage('')
@@ -117,7 +137,7 @@ export function useMenuViewModel(
     }
   }
 
-  const remove = async (id: string) => {
+  const remove = async (id: string): Promise<void> => {
     setLoading(true)
     setErrorMessage('')
     try {
