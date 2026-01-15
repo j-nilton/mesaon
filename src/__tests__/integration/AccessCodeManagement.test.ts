@@ -5,7 +5,7 @@ import { GetCodeHistoryUseCase } from '../../usecase/GetCodeHistoryUseCase'
 import { createMockAccessCodeService, createMockAuthService } from '../mocks'
 import { createMockUser, createMockOrganization } from '../mocks/factories'
 
-describe('Integration: Access Code Management', () => {
+describe('Integração: Gerenciamento de Código de Acesso', () => {
   let accessCodeService: ReturnType<typeof createMockAccessCodeService>
   let authService: ReturnType<typeof createMockAuthService>
   let generateAccessCodeUseCase: GenerateAccessCodeUseCase
@@ -20,7 +20,7 @@ describe('Integration: Access Code Management', () => {
     getCodeHistoryUseCase = new GetCodeHistoryUseCase(authService)
   })
 
-  it('should generate code and validate it', async () => {
+  it('deve gerar código e validá-lo', async () => {
     const mockUser = createMockUser()
     const mockOrg = createMockOrganization()
 
@@ -45,7 +45,7 @@ describe('Integration: Access Code Management', () => {
     expect(validatedOrg).toEqual(mockOrg)
   })
 
-  it('should track code history after generating and validating codes', async () => {
+  it('deve registrar histórico após gerar e validar códigos', async () => {
     const mockUser = createMockUser()
     const mockOrg = createMockOrganization()
     const history = [
@@ -71,7 +71,7 @@ describe('Integration: Access Code Management', () => {
     expect(retrievedHistory[0].code).toBe('123456789')
   })
 
-  it('should prevent unauthenticated user from generating code but allow validation', async () => {
+  it('deve impedir geração sem autenticação, mas permitir validação', async () => {
     const mockOrg = createMockOrganization()
 
     // Try to generate without user - still succeeds but with no user updates

@@ -57,7 +57,7 @@ describe('TableServiceFirebase', () => {
     service = new TableServiceFirebase()
   })
 
-  it('should list tables by accessCode ordered by createdAt', async () => {
+  it('deve listar mesas por accessCode ordenadas por createdAt', async () => {
     vi.mocked(getDocs).mockResolvedValue({
       docs: [
         { id: '2', data: () => ({ createdAt: 2 }) },
@@ -70,7 +70,7 @@ describe('TableServiceFirebase', () => {
     expect(result.map(t => t.id)).toEqual(['1', '2'])
   })
 
-  it('should create a table and correctly calculate the total', async () => {
+  it('deve criar mesa e calcular corretamente o total', async () => {
     vi.mocked(addDoc).mockResolvedValue({ id: '1' } as any)
     vi.mocked(getDoc).mockResolvedValue({
       data: () => ({
@@ -89,7 +89,7 @@ describe('TableServiceFirebase', () => {
     expect(addDoc).toHaveBeenCalled()
   })
 
-  it('should return a table by id', async () => {
+  it('deve retornar uma mesa por id', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       exists: () => true,
       data: () => mockTable(),
@@ -100,7 +100,7 @@ describe('TableServiceFirebase', () => {
     expect(table?.id).toBe('1')
   })
 
-  it('should return null if the table does not exist', async () => {
+  it('deve retornar null se a mesa não existir', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       exists: () => false,
     } as any)
@@ -110,7 +110,7 @@ describe('TableServiceFirebase', () => {
     expect(table).toBeNull()
   })
 
-  it('should update an existing table and recalculate the total', async () => {
+  it('deve atualizar mesa existente e recalcular o total', async () => {
     vi.mocked(getDoc)
       .mockResolvedValueOnce({
         exists: () => true,
@@ -128,7 +128,7 @@ describe('TableServiceFirebase', () => {
     expect(table.total).toBe(20)
   })
 
-  it('should throw an error when updating a non-existent table', async () => {
+  it('deve lançar erro ao atualizar mesa inexistente', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       exists: () => false,
     } as any)
@@ -138,13 +138,13 @@ describe('TableServiceFirebase', () => {
       .toThrow('Mesa não encontrada.')
   })
 
-  it('should delete a table', async () => {
+  it('deve excluir uma mesa', async () => {
     await service.delete('1')
 
     expect(deleteDoc).toHaveBeenCalled()
   })
 
-  it('should subscribe to changes by accessCode', () => {
+  it('deve assinar mudanças por accessCode', () => {
     const unsubscribe = vi.fn()
     vi.mocked(onSnapshot).mockImplementation((_q: any, cb: any) => {
       cb({

@@ -6,7 +6,7 @@ import { RecoverPasswordUseCase } from '../../usecase/RecoverPasswordUseCase'
 import { createMockAuthService } from '../mocks'
 import { createMockUser } from '../mocks/factories'
 
-describe('Integration: User Registration and Verification', () => {
+describe('Integração: Registro e Verificação de Usuário', () => {
   let authService: ReturnType<typeof createMockAuthService>
   let registerUseCase: RegisterUseCase
   let checkEmailVerificationUseCase: CheckEmailVerificationUseCase
@@ -21,7 +21,7 @@ describe('Integration: User Registration and Verification', () => {
     recoverPasswordUseCase = new RecoverPasswordUseCase(authService)
   })
 
-  it('should complete registration and email verification flow', async () => {
+  it('deve completar fluxo de registro e verificação de e-mail', async () => {
     const mockUser = createMockUser({ emailVerified: false })
     const verifiedUser = createMockUser({ emailVerified: true })
 
@@ -58,7 +58,7 @@ describe('Integration: User Registration and Verification', () => {
     expect(isVerified).toBe(true)
   })
 
-  it('should validate registration data', async () => {
+  it('deve validar dados de registro', async () => {
     // Missing name
     await expect(registerUseCase.execute('', 'john@example.com', 'password123')).rejects.toThrow(
       'Todos os campos são obrigatórios.'
@@ -75,7 +75,7 @@ describe('Integration: User Registration and Verification', () => {
     )
   })
 
-  it('should handle password recovery flow', async () => {
+  it('deve lidar com fluxo de recuperação de senha', async () => {
     vi.mocked(authService.resetPassword).mockResolvedValue(undefined)
 
     await recoverPasswordUseCase.execute('john@example.com')
@@ -83,7 +83,7 @@ describe('Integration: User Registration and Verification', () => {
     expect(authService.resetPassword).toHaveBeenCalledWith('john@example.com')
   })
 
-  it('should validate email format for password recovery', async () => {
+  it('deve validar formato de e-mail para recuperação de senha', async () => {
     // Invalid email
     await expect(recoverPasswordUseCase.execute('invalid')).rejects.toThrow('E-mail inválido.')
 
@@ -91,7 +91,7 @@ describe('Integration: User Registration and Verification', () => {
     await expect(recoverPasswordUseCase.execute('')).rejects.toThrow('E-mail inválido.')
   })
 
-  it('should handle service errors gracefully', async () => {
+  it('deve lidar com erros de serviço de forma adequada', async () => {
     const serviceError = new Error('Database error')
 
     vi.mocked(authService.register).mockRejectedValue(serviceError)
@@ -101,7 +101,7 @@ describe('Integration: User Registration and Verification', () => {
     ).rejects.toThrow('Database error')
   })
 
-  it('should not call services when validation fails', async () => {
+  it('deve evitar chamadas de serviço quando validação falhar', async () => {
     // Register with invalid data should not call service
     await expect(registerUseCase.execute('', 'john@example.com', 'password123')).rejects.toThrow()
 

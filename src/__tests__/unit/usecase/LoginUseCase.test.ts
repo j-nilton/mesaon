@@ -3,7 +3,7 @@ import { LoginUseCase } from '../../../usecase/LoginUseCase'
 import { createMockAuthService } from '../../mocks'
 import { createMockUser } from '../../mocks/factories'
 
-describe('Unit: LoginUseCase', () => {
+describe('Unitário: LoginUseCase', () => {
   let useCase: LoginUseCase
   let authService: ReturnType<typeof createMockAuthService>
 
@@ -12,7 +12,7 @@ describe('Unit: LoginUseCase', () => {
     useCase = new LoginUseCase(authService)
   })
 
-  it('should login with valid credentials', async () => {
+  it('deve realizar login com credenciais válidas', async () => {
     const mockUser = createMockUser()
     vi.mocked(authService.login).mockResolvedValue(mockUser)
 
@@ -22,25 +22,25 @@ describe('Unit: LoginUseCase', () => {
     expect(authService.login).toHaveBeenCalledWith('test@example.com', 'password123')
   })
 
-  it('should throw error when email is empty', async () => {
+  it('deve lançar erro quando e-mail está vazio', async () => {
     await expect(useCase.execute('', 'password123')).rejects.toThrow(
       'E-mail e senha são obrigatórios.'
     )
   })
 
-  it('should throw error when password is empty', async () => {
+  it('deve lançar erro quando senha está vazia', async () => {
     await expect(useCase.execute('test@example.com', '')).rejects.toThrow(
       'E-mail e senha são obrigatórios.'
     )
   })
 
-  it('should throw error when both email and password are empty', async () => {
+  it('deve lançar erro quando e-mail e senha estão vazios', async () => {
     await expect(useCase.execute('', '')).rejects.toThrow(
       'E-mail e senha são obrigatórios.'
     )
   })
 
-  it('should not call service when validation fails', async () => {
+  it('deve evitar chamada ao serviço quando validação falhar', async () => {
     await expect(useCase.execute('', 'password')).rejects.toThrow()
 
     expect(authService.login).not.toHaveBeenCalled()

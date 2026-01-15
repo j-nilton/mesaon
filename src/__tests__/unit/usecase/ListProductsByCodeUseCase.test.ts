@@ -3,7 +3,7 @@ import { ListProductsByCodeUseCase } from '../../../usecase/ListProductsByCodeUs
 import { createMockProductService } from '../../mocks'
 import { createMockProduct } from '../../mocks/factories'
 
-describe('Unit: ListProductsByCodeUseCase', () => {
+describe('Unitário: ListProductsByCodeUseCase', () => {
   let useCase: ListProductsByCodeUseCase
   let productService: ReturnType<typeof createMockProductService>
 
@@ -12,7 +12,7 @@ describe('Unit: ListProductsByCodeUseCase', () => {
     useCase = new ListProductsByCodeUseCase(productService)
   })
 
-  it('should list products by access code', async () => {
+  it('deve listar produtos por código de acesso', async () => {
     const mockProducts = [
       createMockProduct({ name: 'Pizza' }),
       createMockProduct({ name: 'Pasta' }),
@@ -26,7 +26,7 @@ describe('Unit: ListProductsByCodeUseCase', () => {
     expect(productService.listByAccessCode).toHaveBeenCalledWith('123456789', undefined, undefined)
   })
 
-  it('should list products with query filter', async () => {
+  it('deve listar produtos com filtro de consulta', async () => {
     const mockProducts = [createMockProduct({ name: 'Pizza Margherita' })]
 
     vi.mocked(productService.listByAccessCode).mockResolvedValue(mockProducts)
@@ -37,7 +37,7 @@ describe('Unit: ListProductsByCodeUseCase', () => {
     expect(productService.listByAccessCode).toHaveBeenCalledWith('123456789', 'Pizza', undefined)
   })
 
-  it('should list products with category filter', async () => {
+  it('deve listar produtos com filtro de categoria', async () => {
     const mockProducts = [createMockProduct({ category: 'Pizzas' })]
 
     vi.mocked(productService.listByAccessCode).mockResolvedValue(mockProducts)
@@ -48,19 +48,19 @@ describe('Unit: ListProductsByCodeUseCase', () => {
     expect(productService.listByAccessCode).toHaveBeenCalledWith('123456789', undefined, 'Pizzas')
   })
 
-  it('should throw error with invalid access code format', async () => {
+  it('deve lançar erro com formato inválido de código de acesso', async () => {
     await expect(useCase.execute('12345')).rejects.toThrow(
       'Código de acesso inválido.'
     )
   })
 
-  it('should throw error when access code is empty', async () => {
+  it('deve lançar erro quando código de acesso está vazio', async () => {
     await expect(useCase.execute('')).rejects.toThrow(
       'Código de acesso inválido.'
     )
   })
 
-  it('should return empty array when no products found', async () => {
+  it('deve retornar array vazio quando nenhum produto for encontrado', async () => {
     vi.mocked(productService.listByAccessCode).mockResolvedValue([])
 
     const result = await useCase.execute('123456789')

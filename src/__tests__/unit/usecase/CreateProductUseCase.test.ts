@@ -3,7 +3,7 @@ import { CreateProductUseCase } from '../../../usecase/CreateProductUseCase'
 import { createMockAuthService, createMockProductService } from '../../mocks'
 import { createMockUser, createMockProduct } from '../../mocks/factories'
 
-describe('Unit: CreateProductUseCase', () => {
+describe('Unitário: CreateProductUseCase', () => {
   let useCase: CreateProductUseCase
   let authService: ReturnType<typeof createMockAuthService>
   let productService: ReturnType<typeof createMockProductService>
@@ -14,7 +14,7 @@ describe('Unit: CreateProductUseCase', () => {
     useCase = new CreateProductUseCase(productService, authService)
   })
 
-  it('should create a product with valid data', async () => {
+  it('deve criar produto com dados válidos', async () => {
     const mockUser = createMockUser()
     const mockProduct = createMockProduct()
     const input = { name: 'Pizza', price: 45.99, category: 'Pizzas' as const }
@@ -29,7 +29,7 @@ describe('Unit: CreateProductUseCase', () => {
     expect(productService.create).toHaveBeenCalledWith('123456789', input)
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     const input = { name: 'Pizza', price: 45.99, category: 'Pizzas' as const }
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
@@ -39,7 +39,7 @@ describe('Unit: CreateProductUseCase', () => {
     )
   })
 
-  it('should throw error when user organization does not match access code', async () => {
+  it('deve lançar erro quando organização do usuário não corresponde ao código', async () => {
     const mockUser = createMockUser({ organizationId: '999999999' })
     const input = { name: 'Pizza', price: 45.99, category: 'Pizzas' as const }
 
@@ -51,7 +51,7 @@ describe('Unit: CreateProductUseCase', () => {
     )
   })
 
-  it('should throw error with invalid access code format', async () => {
+  it('deve lançar erro com formato inválido de código de acesso', async () => {
     const mockUser = createMockUser({ organizationId: '12345' })
     const input = { name: 'Pizza', price: 45.99, category: 'Pizzas' as const }
 
@@ -63,7 +63,7 @@ describe('Unit: CreateProductUseCase', () => {
     )
   })
 
-  it('should throw error when product name is empty', async () => {
+  it('deve lançar erro quando nome do produto está vazio', async () => {
     const mockUser = createMockUser()
     const input = { name: '   ', price: 45.99, category: 'Pizzas' as const }
 
@@ -75,7 +75,7 @@ describe('Unit: CreateProductUseCase', () => {
     )
   })
 
-  it('should throw error when price is zero', async () => {
+  it('deve lançar erro quando preço é zero', async () => {
     const mockUser = createMockUser()
     const input = { name: 'Pizza', price: 0, category: 'Pizzas' as const }
 
@@ -87,7 +87,7 @@ describe('Unit: CreateProductUseCase', () => {
     )
   })
 
-  it('should throw error when price is negative', async () => {
+  it('deve lançar erro quando preço é negativo', async () => {
     const mockUser = createMockUser()
     const input = { name: 'Pizza', price: -10, category: 'Pizzas' as const }
 
@@ -99,7 +99,7 @@ describe('Unit: CreateProductUseCase', () => {
     )
   })
 
-  it('should throw error when price is NaN', async () => {
+  it('deve lançar erro quando preço é NaN', async () => {
     const mockUser = createMockUser()
     const input = { name: 'Pizza', price: NaN, category: 'Pizzas' as const }
 

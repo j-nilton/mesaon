@@ -36,7 +36,7 @@ describe('AccessCodeServiceFirebase', () => {
   // ------------------------------
   // generateUniqueCode
   // ------------------------------
-  it('should generate a unique code when there is no organization.', async () => {
+  it('deve gerar código único quando não há organização.', async () => {
     vi.spyOn(service, 'getOrganizationByCode').mockResolvedValue(null)
 
     const code = await service.generateUniqueCode()
@@ -48,7 +48,7 @@ describe('AccessCodeServiceFirebase', () => {
   // ------------------------------
   // createOrganizationWithCode
   // ------------------------------
-  it('must create an organization with the correct data.', async () => {
+  it('deve criar organização com os dados corretos.', async () => {
     const nowSpy = vi.spyOn(Date, 'now').mockReturnValue(123456)
 
     const org = await service.createOrganizationWithCode('123456789', {
@@ -74,7 +74,7 @@ describe('AccessCodeServiceFirebase', () => {
   // ------------------------------
   // getOrganizationByCode
   // ------------------------------
-  it('should return null if the organization does not exist.', async () => {
+  it('deve retornar null se a organização não existir.', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       exists: () => false,
     } as any)
@@ -84,7 +84,7 @@ describe('AccessCodeServiceFirebase', () => {
     expect(result).toBeNull()
   })
 
-  it('should be returned to the organization if it exists.', async () => {
+  it('deve retornar a organização se ela existir.', async () => {
     const data = { id: '123' }
 
     vi.mocked(getDoc).mockResolvedValue({
@@ -100,7 +100,7 @@ describe('AccessCodeServiceFirebase', () => {
   // ------------------------------
   // deleteOrganizationByCode
   // ------------------------------
-  it('should exclude the organization by code.', async () => {
+  it('deve excluir a organização pelo código.', async () => {
     await service.deleteOrganizationByCode('123')
 
     expect(deleteDoc).toHaveBeenCalled()
@@ -109,7 +109,7 @@ describe('AccessCodeServiceFirebase', () => {
   // ------------------------------
   // updateMembersCount
   // ------------------------------
-  it('should increment the member counter when updateDoc runs.', async () => {
+  it('deve incrementar contador de membros quando updateDoc executar.', async () => {
     vi.mocked(updateDoc).mockResolvedValue(undefined)
 
     await service.updateMembersCount('123', 2)
@@ -120,7 +120,7 @@ describe('AccessCodeServiceFirebase', () => {
     )
   })
 
-  it('should set the membersCount if updateDoc fails.', async () => {
+  it('deve definir membersCount se updateDoc falhar.', async () => {
     vi.mocked(updateDoc).mockRejectedValue(new Error('erro'))
     vi.mocked(setDoc).mockResolvedValue(undefined)
 

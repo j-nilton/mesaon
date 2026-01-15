@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { DeleteAccessCodeUseCase } from '../../../usecase/DeleteAccessCodeUseCase'
 import { createMockAccessCodeService } from '../../mocks'
 
-describe('Unit: DeleteAccessCodeUseCase', () => {
+describe('Unitário: DeleteAccessCodeUseCase', () => {
   let useCase: DeleteAccessCodeUseCase
   let accessCodeService: ReturnType<typeof createMockAccessCodeService>
 
@@ -11,7 +11,7 @@ describe('Unit: DeleteAccessCodeUseCase', () => {
     useCase = new DeleteAccessCodeUseCase(accessCodeService)
   })
 
-  it('should delete organization by code', async () => {
+  it('deve excluir organização pelo código', async () => {
     vi.mocked(accessCodeService.deleteOrganizationByCode).mockResolvedValue(undefined)
 
     await useCase.execute('123456789')
@@ -20,7 +20,7 @@ describe('Unit: DeleteAccessCodeUseCase', () => {
     expect(accessCodeService.deleteOrganizationByCode).toHaveBeenCalledTimes(1)
   })
 
-  it('should pass the exact code provided', async () => {
+  it('deve repassar exatamente o código fornecido', async () => {
     vi.mocked(accessCodeService.deleteOrganizationByCode).mockResolvedValue(undefined)
 
     await useCase.execute('999888777')
@@ -28,7 +28,7 @@ describe('Unit: DeleteAccessCodeUseCase', () => {
     expect(accessCodeService.deleteOrganizationByCode).toHaveBeenCalledWith('999888777')
   })
 
-  it('should handle errors from access code service', async () => {
+  it('deve lidar com erros do serviço de códigos de acesso', async () => {
     const error = new Error('Organization not found')
     vi.mocked(accessCodeService.deleteOrganizationByCode).mockRejectedValue(error)
 

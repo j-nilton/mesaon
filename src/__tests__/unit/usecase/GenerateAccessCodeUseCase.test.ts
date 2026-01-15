@@ -3,7 +3,7 @@ import { GenerateAccessCodeUseCase } from '../../../usecase/GenerateAccessCodeUs
 import { createMockAccessCodeService, createMockAuthService } from '../../mocks'
 import { createMockUser, createMockOrganization } from '../../mocks/factories'
 
-describe('Unit: GenerateAccessCodeUseCase', () => {
+describe('Unitário: GenerateAccessCodeUseCase', () => {
   let useCase: GenerateAccessCodeUseCase
   let accessCodeService: ReturnType<typeof createMockAccessCodeService>
   let authService: ReturnType<typeof createMockAuthService>
@@ -14,7 +14,7 @@ describe('Unit: GenerateAccessCodeUseCase', () => {
     useCase = new GenerateAccessCodeUseCase(accessCodeService, authService)
   })
 
-  it('should generate access code without current user', async () => {
+  it('deve gerar código de acesso sem usuário atual', async () => {
     const mockOrg = createMockOrganization()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
     vi.mocked(accessCodeService.generateUniqueCode).mockResolvedValue('123456789')
@@ -27,7 +27,7 @@ describe('Unit: GenerateAccessCodeUseCase', () => {
     expect(accessCodeService.createOrganizationWithCode).toHaveBeenCalledWith('123456789', undefined)
   })
 
-  it('should generate access code with current user and update organization', async () => {
+  it('deve gerar código de acesso com usuário atual e atualizar organização', async () => {
     const mockUser = createMockUser()
     const mockOrg = createMockOrganization()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
@@ -43,7 +43,7 @@ describe('Unit: GenerateAccessCodeUseCase', () => {
     expect(authService.addCodeToHistory).toHaveBeenCalledWith(mockUser.id, '123456789')
   })
 
-  it('should not update user organization when no user is logged in', async () => {
+  it('deve não atualizar organização do usuário quando não há login', async () => {
     const mockOrg = createMockOrganization()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
     vi.mocked(accessCodeService.generateUniqueCode).mockResolvedValue('123456789')
@@ -55,7 +55,7 @@ describe('Unit: GenerateAccessCodeUseCase', () => {
     expect(authService.addCodeToHistory).not.toHaveBeenCalled()
   })
 
-  it('should generate unique code before creating organization', async () => {
+  it('deve gerar código único antes de criar organização', async () => {
     const mockOrg = createMockOrganization()
     let generateCalled = false
     let createCalled = false

@@ -3,7 +3,7 @@ import { SetUserRoleUseCase } from '../../../usecase/SetUserRoleUseCase'
 import { createMockAuthService } from '../../mocks'
 import { createMockUser } from '../../mocks/factories'
 
-describe('Unit: SetUserRoleUseCase', () => {
+describe('Unitário: SetUserRoleUseCase', () => {
   let useCase: SetUserRoleUseCase
   let authService: ReturnType<typeof createMockAuthService>
 
@@ -12,7 +12,7 @@ describe('Unit: SetUserRoleUseCase', () => {
     useCase = new SetUserRoleUseCase(authService)
   })
 
-  it('should set user role to organization', async () => {
+  it('deve definir papel do usuário como organization', async () => {
     const mockUser = createMockUser()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
     vi.mocked(authService.setUserRole).mockResolvedValue(undefined)
@@ -22,7 +22,7 @@ describe('Unit: SetUserRoleUseCase', () => {
     expect(authService.setUserRole).toHaveBeenCalledWith(mockUser.id, 'organization')
   })
 
-  it('should set user role to collaborator', async () => {
+  it('deve definir papel do usuário como collaborator', async () => {
     const mockUser = createMockUser()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
     vi.mocked(authService.setUserRole).mockResolvedValue(undefined)
@@ -32,7 +32,7 @@ describe('Unit: SetUserRoleUseCase', () => {
     expect(authService.setUserRole).toHaveBeenCalledWith(mockUser.id, 'collaborator')
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
 
     await expect(useCase.execute('organization')).rejects.toThrow(
@@ -40,7 +40,7 @@ describe('Unit: SetUserRoleUseCase', () => {
     )
   })
 
-  it('should not call setUserRole when user is not authenticated', async () => {
+  it('deve não chamar setUserRole quando usuário não está autenticado', async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
 
     await expect(useCase.execute('organization')).rejects.toThrow()

@@ -49,7 +49,7 @@ describe('ProductServiceFirebase', () => {
   // ------------------------------
   // listByAccessCode
   // ------------------------------
-  it('should list products by access code', async () => {
+  it('deve listar produtos por código de acesso', async () => {
     vi.mocked(getDocs).mockResolvedValue({
       docs: [
         {
@@ -79,7 +79,7 @@ describe('ProductServiceFirebase', () => {
     expect(result[0].id).toBe('p2') // ordered by createdAt desc
   })
 
-  it('should filter products by search term', async () => {
+  it('deve filtrar produtos pelo termo de busca', async () => {
     vi.mocked(getDocs).mockResolvedValue({
       docs: [
         {
@@ -109,7 +109,7 @@ describe('ProductServiceFirebase', () => {
     expect(result[0].name).toBe('Pizza')
   })
 
-  it('should apply category filter', async () => {
+  it('deve aplicar filtro de categoria', async () => {
     vi.mocked(getDocs).mockResolvedValue({ docs: [] } as any)
 
     await service.listByAccessCode('123', undefined, 'Bebidas' as ProductCategory)
@@ -120,7 +120,7 @@ describe('ProductServiceFirebase', () => {
   // ------------------------------
   // create
   // ------------------------------
-  it('should create a product', async () => {
+  it('deve criar um produto', async () => {
     vi.mocked(addDoc).mockResolvedValue({ id: 'p1' } as any)
     vi.mocked(getDoc).mockResolvedValue({
       data: () => ({
@@ -144,7 +144,7 @@ describe('ProductServiceFirebase', () => {
   // ------------------------------
   // update
   // ------------------------------
-  it('should update a product', async () => {
+  it('deve atualizar um produto', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       data: () => ({
         name: 'Updated Pizza',
@@ -160,7 +160,7 @@ describe('ProductServiceFirebase', () => {
   // ------------------------------
   // delete
   // ------------------------------
-  it('should delete a product', async () => {
+  it('deve excluir um produto', async () => {
     await service.delete('p1')
 
     expect(deleteDoc).toHaveBeenCalled()

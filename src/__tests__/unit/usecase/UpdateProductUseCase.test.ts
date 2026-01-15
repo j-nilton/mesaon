@@ -3,7 +3,7 @@ import { UpdateProductUseCase } from '../../../usecase/UpdateProductUseCase'
 import { createMockAuthService, createMockProductService } from '../../mocks'
 import { createMockUser, createMockProduct } from '../../mocks/factories'
 
-describe('Unit: UpdateProductUseCase', () => {
+describe('Unitário: UpdateProductUseCase', () => {
   let useCase: UpdateProductUseCase
   let authService: ReturnType<typeof createMockAuthService>
   let productService: ReturnType<typeof createMockProductService>
@@ -14,7 +14,7 @@ describe('Unit: UpdateProductUseCase', () => {
     useCase = new UpdateProductUseCase(productService, authService)
   })
 
-  it('should update product with valid data', async () => {
+  it('deve atualizar produto com dados válidos', async () => {
     const mockUser = createMockUser()
     const mockProduct = createMockProduct()
     const changes = { name: 'Updated Pizza', price: 55.99 }
@@ -29,7 +29,7 @@ describe('Unit: UpdateProductUseCase', () => {
     expect(productService.update).toHaveBeenCalled()
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     const changes = { name: 'Updated Pizza' }
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
@@ -39,7 +39,7 @@ describe('Unit: UpdateProductUseCase', () => {
     )
   })
 
-  it('should throw error when user has no organization', async () => {
+  it('deve lançar erro quando usuário não tem organização', async () => {
     const mockUser = createMockUser({ organizationId: undefined })
     const changes = { name: 'Updated Pizza' }
 
@@ -51,7 +51,7 @@ describe('Unit: UpdateProductUseCase', () => {
     )
   })
 
-  it('should throw error when price is zero', async () => {
+  it('deve lançar erro quando preço é zero', async () => {
     const mockUser = createMockUser()
     const changes = { price: 0 }
 
@@ -63,7 +63,7 @@ describe('Unit: UpdateProductUseCase', () => {
     )
   })
 
-  it('should throw error when price is negative', async () => {
+  it('deve lançar erro quando preço é negativo', async () => {
     const mockUser = createMockUser()
     const changes = { price: -10 }
 
@@ -75,7 +75,7 @@ describe('Unit: UpdateProductUseCase', () => {
     )
   })
 
-  it('should throw error when product name is empty', async () => {
+  it('deve lançar erro quando nome do produto está vazio', async () => {
     const mockUser = createMockUser()
     const changes = { name: '   ' }
 
@@ -87,7 +87,7 @@ describe('Unit: UpdateProductUseCase', () => {
     )
   })
 
-  it('should allow updating price to positive value', async () => {
+  it('deve permitir atualização de preço para valor positivo', async () => {
     const mockUser = createMockUser()
     const mockProduct = createMockProduct()
     const changes = { price: 49.99 }

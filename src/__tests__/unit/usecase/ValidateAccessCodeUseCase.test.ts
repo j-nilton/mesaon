@@ -3,7 +3,7 @@ import { ValidateAccessCodeUseCase } from '../../../usecase/ValidateAccessCodeUs
 import { createMockAccessCodeService, createMockAuthService } from '../../mocks'
 import { createMockUser, createMockOrganization } from '../../mocks/factories'
 
-describe('Unit: ValidateAccessCodeUseCase', () => {
+describe('Unitário: ValidateAccessCodeUseCase', () => {
   let useCase: ValidateAccessCodeUseCase
   let accessCodeService: ReturnType<typeof createMockAccessCodeService>
   let authService: ReturnType<typeof createMockAuthService>
@@ -14,7 +14,7 @@ describe('Unit: ValidateAccessCodeUseCase', () => {
     useCase = new ValidateAccessCodeUseCase(accessCodeService, authService)
   })
 
-  it('should validate access code without user', async () => {
+  it('deve validar código de acesso sem usuário', async () => {
     const mockOrg = createMockOrganization()
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
@@ -26,7 +26,7 @@ describe('Unit: ValidateAccessCodeUseCase', () => {
     expect(accessCodeService.getOrganizationByCode).toHaveBeenCalledWith('123456789')
   })
 
-  it('should validate and update user organization', async () => {
+  it('deve validar e atualizar organização do usuário', async () => {
     const mockUser = createMockUser()
     const mockOrg = createMockOrganization()
 
@@ -44,13 +44,13 @@ describe('Unit: ValidateAccessCodeUseCase', () => {
     expect(accessCodeService.updateMembersCount).toHaveBeenCalledWith('123456789', 1)
   })
 
-  it('should throw error with invalid code format', async () => {
+  it('deve lançar erro com formato de código inválido', async () => {
     await expect(useCase.execute('12345')).rejects.toThrow(
       'Código inválido. Informe 9 dígitos.'
     )
   })
 
-  it('should normalize code before validation', async () => {
+  it('deve normalizar código antes da validação', async () => {
     const mockOrg = createMockOrganization()
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
@@ -61,7 +61,7 @@ describe('Unit: ValidateAccessCodeUseCase', () => {
     expect(accessCodeService.getOrganizationByCode).toHaveBeenCalledWith('123456789')
   })
 
-  it('should throw error when code does not exist', async () => {
+  it('deve lançar erro quando código não existe', async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
     vi.mocked(accessCodeService.getOrganizationByCode).mockResolvedValue(null)
 
@@ -70,7 +70,7 @@ describe('Unit: ValidateAccessCodeUseCase', () => {
     )
   })
 
-  it('should throw error with non-numeric characters', async () => {
+  it('deve lançar erro com caracteres não numéricos', async () => {
     await expect(useCase.execute('123abc789')).rejects.toThrow(
       'Código inválido. Informe 9 dígitos.'
     )

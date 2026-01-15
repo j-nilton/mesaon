@@ -3,7 +3,7 @@ import { DeleteTableUseCase } from '../../../usecase/DeleteTableUseCase'
 import { createMockAuthService, createMockTableService } from '../../mocks'
 import { createMockUser } from '../../mocks/factories'
 
-describe('Unit: DeleteTableUseCase', () => {
+describe('Unitário: DeleteTableUseCase', () => {
   let useCase: DeleteTableUseCase
   let authService: ReturnType<typeof createMockAuthService>
   let tableService: ReturnType<typeof createMockTableService>
@@ -14,7 +14,7 @@ describe('Unit: DeleteTableUseCase', () => {
     useCase = new DeleteTableUseCase(tableService, authService)
   })
 
-  it('should delete table when user is authenticated', async () => {
+  it('deve excluir mesa quando usuário estiver autenticado', async () => {
     const mockUser = createMockUser()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
     vi.mocked(tableService.delete).mockResolvedValue(undefined)
@@ -24,13 +24,13 @@ describe('Unit: DeleteTableUseCase', () => {
     expect(tableService.delete).toHaveBeenCalledWith('table-123')
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
 
     await expect(useCase.execute('table-123')).rejects.toThrow('Usuário não autenticado.')
   })
 
-  it('should pass correct table id to service', async () => {
+  it('deve repassar id correto da mesa ao serviço', async () => {
     const mockUser = createMockUser()
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
     vi.mocked(tableService.delete).mockResolvedValue(undefined)

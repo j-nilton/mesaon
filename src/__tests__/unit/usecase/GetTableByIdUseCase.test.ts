@@ -3,7 +3,7 @@ import { GetTableByIdUseCase } from '../../../usecase/GetTableByIdUseCase'
 import { createMockAuthService, createMockTableService } from '../../mocks'
 import { createMockUser, createMockTable } from '../../mocks/factories'
 
-describe('Unit: GetTableByIdUseCase', () => {
+describe('Unitário: GetTableByIdUseCase', () => {
   let useCase: GetTableByIdUseCase
   let authService: ReturnType<typeof createMockAuthService>
   let tableService: ReturnType<typeof createMockTableService>
@@ -14,7 +14,7 @@ describe('Unit: GetTableByIdUseCase', () => {
     useCase = new GetTableByIdUseCase(tableService, authService)
   })
 
-  it('should return table when user is authenticated', async () => {
+  it('deve retornar mesa quando usuário estiver autenticado', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
 
@@ -27,7 +27,7 @@ describe('Unit: GetTableByIdUseCase', () => {
     expect(tableService.getById).toHaveBeenCalledWith('table-123')
   })
 
-  it('should return null when table does not exist', async () => {
+  it('deve retornar null quando mesa não existir', async () => {
     const mockUser = createMockUser()
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)
@@ -38,7 +38,7 @@ describe('Unit: GetTableByIdUseCase', () => {
     expect(result).toBeNull()
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
 
     await expect(useCase.execute('table-123')).rejects.toThrow(
@@ -46,7 +46,7 @@ describe('Unit: GetTableByIdUseCase', () => {
     )
   })
 
-  it('should pass correct table id to service', async () => {
+  it('deve repassar id correto da mesa ao serviço', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
 

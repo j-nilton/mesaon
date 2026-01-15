@@ -8,7 +8,7 @@ import { SubscribeTablesByCodeUseCase } from '../../usecase/SubscribeTablesByCod
 import { createMockAuthService, createMockTableService } from '../mocks'
 import { createMockUser, createMockTable, createMockTableOrder } from '../mocks/factories'
 
-describe('Integration: Table Management', () => {
+describe('Integração: Gerenciamento de Mesas', () => {
   let authService: ReturnType<typeof createMockAuthService>
   let tableService: ReturnType<typeof createMockTableService>
   let createTableUseCase: CreateTableUseCase
@@ -29,7 +29,7 @@ describe('Integration: Table Management', () => {
     subscribeTablesByCodeUseCase = new SubscribeTablesByCodeUseCase(tableService)
   })
 
-  it('should create, list, get, update, and delete a table', async () => {
+  it('deve criar, listar, obter, atualizar e excluir uma mesa', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
 
@@ -70,7 +70,7 @@ describe('Integration: Table Management', () => {
     expect(tableService.delete).toHaveBeenCalledWith('table-123')
   })
 
-  it('should handle subscription to tables', async () => {
+  it('deve lidar com assinatura de mesas', async () => {
     const mockUnsubscribe = vi.fn()
     const mockOnChange = vi.fn()
     const tables = [createMockTable({ name: 'Mesa 1' })]
@@ -83,7 +83,7 @@ describe('Integration: Table Management', () => {
     expect(tableService.subscribeByAccessCode).toHaveBeenCalledWith('123456789', mockOnChange)
   })
 
-  it('should validate table data across operations', async () => {
+  it('deve validar dados da mesa nas operações', async () => {
     const mockUser = createMockUser()
 
     // Create with invalid name
@@ -110,7 +110,7 @@ describe('Integration: Table Management', () => {
     ).rejects.toThrow('Pedidos inválidos.')
   })
 
-  it('should require authentication for table operations', async () => {
+  it('deve exigir autenticação nas operações de mesa', async () => {
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
 
     // Create requires auth
@@ -139,7 +139,7 @@ describe('Integration: Table Management', () => {
     expect(result).toEqual([])
   })
 
-  it('should handle multiple tables with different states', async () => {
+  it('deve lidar com múltiplas mesas em diferentes estados', async () => {
     const mockUser = createMockUser()
     const table1 = createMockTable({ id: 'table-1', name: 'Mesa 1' })
     const table2 = createMockTable({ id: 'table-2', name: 'Mesa 2' })

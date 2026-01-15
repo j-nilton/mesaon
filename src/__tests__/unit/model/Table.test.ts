@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { Table, TableOrder } from '../../../model/entities/Table'
 import { createMockTable, createMockTableOrder } from '../../mocks/factories'
 
-describe('Unit: Table Entity', () => {
-  it('should create a table with required properties', () => {
+describe('Unitário: Entidade Mesa', () => {
+  it('deve criar mesa com propriedades obrigatórias', () => {
     const table = createMockTable()
 
     expect(table).toBeDefined()
@@ -13,7 +13,7 @@ describe('Unit: Table Entity', () => {
     expect(table.createdAt).toBeDefined()
   })
 
-  it('should have correct required properties', () => {
+  it('deve possuir propriedades obrigatórias corretas', () => {
     const table = createMockTable()
 
     expect(table.id).toBe('table-123')
@@ -22,7 +22,7 @@ describe('Unit: Table Entity', () => {
     expect(table.createdAt).toBeGreaterThan(0)
   })
 
-  it('should have optional properties: waiterName, notes, orders, total, updatedAt', () => {
+  it('deve possuir propriedades opcionais: waiterName, notes, orders, total, updatedAt', () => {
     const table = createMockTable()
 
     expect(table.waiterName).toBeDefined()
@@ -31,7 +31,7 @@ describe('Unit: Table Entity', () => {
     expect(Array.isArray(table.orders)).toBe(true)
   })
 
-  it('should create table with minimal properties', () => {
+  it('deve criar mesa com propriedades mínimas', () => {
     const minimalTable: Table = {
       id: 'table-001',
       accessCode: 'ABC123',
@@ -48,7 +48,7 @@ describe('Unit: Table Entity', () => {
     expect(minimalTable.updatedAt).toBeUndefined()
   })
 
-  it('should handle table orders correctly', () => {
+  it('deve tratar pedidos da mesa corretamente', () => {
     const orders: TableOrder[] = [
       createMockTableOrder({ name: 'Pizza', quantity: 1 }),
       createMockTableOrder({ name: 'Refrigerante', quantity: 2 }),
@@ -61,7 +61,7 @@ describe('Unit: Table Entity', () => {
     expect(table.orders?.[1].quantity).toBe(2)
   })
 
-  it('should calculate total from orders', () => {
+  it('deve calcular total a partir dos pedidos', () => {
     const orders: TableOrder[] = [
       createMockTableOrder({ price: 50.0, quantity: 1 }),
       createMockTableOrder({ price: 20.0, quantity: 2 }),
@@ -72,14 +72,14 @@ describe('Unit: Table Entity', () => {
     expect(table.total).toBe(90.0)
   })
 
-  it('should handle empty orders array', () => {
+  it('deve lidar com array de pedidos vazio', () => {
     const table = createMockTable({ orders: [], total: 0 })
 
     expect(table.orders).toHaveLength(0)
     expect(table.total).toBe(0)
   })
 
-  it('should update table properties', () => {
+  it('deve atualizar propriedades da mesa', () => {
     const originalTable = createMockTable()
     const updatedTable: Table = {
       ...originalTable,
@@ -94,7 +94,7 @@ describe('Unit: Table Entity', () => {
     expect(updatedTable.id).toBe(originalTable.id)
   })
 
-  it('should create table with partial overrides', () => {
+  it('deve criar mesa com sobrescritas parciais', () => {
     const table = createMockTable({
       name: 'Mesa Especial',
       waiterName: 'Carlos',
@@ -106,7 +106,7 @@ describe('Unit: Table Entity', () => {
     expect(table.accessCode).toBe('123456789')
   })
 
-  it('should preserve accessCode consistency', () => {
+  it('deve preservar consistência de accessCode', () => {
     const table = createMockTable({ accessCode: 'CODE123' })
 
     expect(table.accessCode).toBe('CODE123')
@@ -114,8 +114,8 @@ describe('Unit: Table Entity', () => {
   })
 })
 
-describe('Unit: TableOrder Entity', () => {
-  it('should create a table order with required properties', () => {
+describe('Unitário: Entidade TableOrder', () => {
+  it('deve criar pedido de mesa com propriedades obrigatórias', () => {
     const order = createMockTableOrder()
 
     expect(order).toBeDefined()
@@ -125,7 +125,7 @@ describe('Unit: TableOrder Entity', () => {
     expect(order.quantity).toBeDefined()
   })
 
-  it('should have correct properties', () => {
+  it('deve possuir propriedades corretas', () => {
     const order = createMockTableOrder()
 
     expect(order.id).toBe('order-123')
@@ -134,7 +134,7 @@ describe('Unit: TableOrder Entity', () => {
     expect(order.quantity).toBe(2)
   })
 
-  it('should handle quantity as positive number', () => {
+  it('deve tratar quantidade como número positivo', () => {
     const order = createMockTableOrder({ quantity: 5 })
 
     expect(order.quantity).toBe(5)
@@ -142,14 +142,14 @@ describe('Unit: TableOrder Entity', () => {
     expect(order.quantity).toBeGreaterThan(0)
   })
 
-  it('should handle price as decimal', () => {
+  it('deve tratar preço como decimal', () => {
     const order = createMockTableOrder({ price: 99.99 })
 
     expect(order.price).toBe(99.99)
     expect(typeof order.price).toBe('number')
   })
 
-  it('should update order properties', () => {
+  it('deve atualizar propriedades do pedido', () => {
     const originalOrder = createMockTableOrder()
     const updatedOrder: TableOrder = {
       ...originalOrder,
@@ -162,7 +162,7 @@ describe('Unit: TableOrder Entity', () => {
     expect(updatedOrder.id).toBe(originalOrder.id)
   })
 
-  it('should calculate order total', () => {
+  it('deve calcular total do pedido', () => {
     const order = createMockTableOrder({ price: 50.0, quantity: 3 })
     const total = order.price * order.quantity
 

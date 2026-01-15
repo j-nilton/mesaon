@@ -3,7 +3,7 @@ import { ListTablesByCodeUseCase } from '../../../usecase/ListTablesByCodeUseCas
 import { createMockTableService } from '../../mocks'
 import { createMockTable } from '../../mocks/factories'
 
-describe('Unit: ListTablesByCodeUseCase', () => {
+describe('Unitário: ListTablesByCodeUseCase', () => {
   let useCase: ListTablesByCodeUseCase
   let tableService: ReturnType<typeof createMockTableService>
 
@@ -12,7 +12,7 @@ describe('Unit: ListTablesByCodeUseCase', () => {
     useCase = new ListTablesByCodeUseCase(tableService)
   })
 
-  it('should list tables by access code', async () => {
+  it('deve listar mesas por código de acesso', async () => {
     const mockTables = [
       createMockTable({ name: 'Mesa 1' }),
       createMockTable({ name: 'Mesa 2' }),
@@ -26,19 +26,19 @@ describe('Unit: ListTablesByCodeUseCase', () => {
     expect(tableService.listByAccessCode).toHaveBeenCalledWith('123456789')
   })
 
-  it('should throw error with invalid access code format', async () => {
+  it('deve lançar erro com formato inválido de código de acesso', async () => {
     await expect(useCase.execute('12345')).rejects.toThrow(
       'Código de acesso inválido.'
     )
   })
 
-  it('should throw error when access code is empty', async () => {
+  it('deve lançar erro quando código de acesso está vazio', async () => {
     await expect(useCase.execute('')).rejects.toThrow(
       'Código de acesso inválido.'
     )
   })
 
-  it('should return empty array when no tables found', async () => {
+  it('deve retornar array vazio quando nenhuma mesa for encontrada', async () => {
     vi.mocked(tableService.listByAccessCode).mockResolvedValue([])
 
     const result = await useCase.execute('123456789')
@@ -46,7 +46,7 @@ describe('Unit: ListTablesByCodeUseCase', () => {
     expect(result).toEqual([])
   })
 
-  it('should not call service for invalid access code', async () => {
+  it('deve não chamar serviço para código de acesso inválido', async () => {
     await expect(useCase.execute('abc')).rejects.toThrow()
 
     expect(tableService.listByAccessCode).not.toHaveBeenCalled()

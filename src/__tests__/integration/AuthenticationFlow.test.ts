@@ -5,7 +5,7 @@ import { GetCurrentUserProfileUseCase } from '../../usecase/GetCurrentUserProfil
 import { createMockAuthService } from '../mocks'
 import { createMockUser } from '../mocks/factories'
 
-describe('Integration: Authentication Flow', () => {
+describe('Integração: Fluxo de Autenticação', () => {
   let authService: ReturnType<typeof createMockAuthService>
   let loginUseCase: LoginUseCase
   let setUserRoleUseCase: SetUserRoleUseCase
@@ -18,7 +18,7 @@ describe('Integration: Authentication Flow', () => {
     getCurrentUserProfileUseCase = new GetCurrentUserProfileUseCase(authService)
   })
 
-  it('should complete login -> set role -> get profile flow', async () => {
+  it('deve completar login → definir papel → obter perfil', async () => {
     const mockUser = createMockUser()
     const mockProfile = createMockUser({ role: 'organization' })
 
@@ -40,7 +40,7 @@ describe('Integration: Authentication Flow', () => {
     expect(profile).toEqual(mockProfile)
   })
 
-  it('should handle failed login gracefully', async () => {
+  it('deve lidar com falha de login de forma adequada', async () => {
     vi.mocked(authService.login).mockRejectedValue(new Error('Invalid credentials'))
 
     await expect(loginUseCase.execute('wrong@example.com', 'wrong')).rejects.toThrow(
@@ -48,7 +48,7 @@ describe('Integration: Authentication Flow', () => {
     )
   })
 
-  it('should prevent role change after logout', async () => {
+  it('deve impedir alteração de papel após logout', async () => {
     const mockUser = createMockUser()
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(mockUser)

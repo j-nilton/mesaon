@@ -3,7 +3,7 @@ import { UpdateTableUseCase } from '../../../usecase/UpdateTableUseCase'
 import { createMockAuthService, createMockTableService } from '../../mocks'
 import { createMockUser, createMockTable, createMockTableOrder } from '../../mocks/factories'
 
-describe('Unit: UpdateTableUseCase', () => {
+describe('Unitário: UpdateTableUseCase', () => {
   let useCase: UpdateTableUseCase
   let authService: ReturnType<typeof createMockAuthService>
   let tableService: ReturnType<typeof createMockTableService>
@@ -14,7 +14,7 @@ describe('Unit: UpdateTableUseCase', () => {
     useCase = new UpdateTableUseCase(tableService, authService)
   })
 
-  it('should update table with valid data', async () => {
+  it('deve atualizar mesa com dados válidos', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const changes = { name: 'Mesa 1 Atualizada' }
@@ -28,7 +28,7 @@ describe('Unit: UpdateTableUseCase', () => {
     expect(tableService.update).toHaveBeenCalled()
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     const changes = { name: 'Mesa 1' }
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
@@ -38,7 +38,7 @@ describe('Unit: UpdateTableUseCase', () => {
     )
   })
 
-  it('should throw error when table name is empty', async () => {
+  it('deve lançar erro quando nome da mesa está vazio', async () => {
     const mockUser = createMockUser()
     const changes = { name: '   ' }
 
@@ -49,7 +49,7 @@ describe('Unit: UpdateTableUseCase', () => {
     )
   })
 
-  it('should validate orders when updating', async () => {
+  it('deve validar pedidos ao atualizar', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const changes = { orders: [createMockTableOrder()] }
@@ -62,7 +62,7 @@ describe('Unit: UpdateTableUseCase', () => {
     expect(result).toEqual(mockTable)
   })
 
-  it('should throw error when order has invalid name', async () => {
+  it('deve lançar erro quando pedido possui nome inválido', async () => {
     const mockUser = createMockUser()
     const changes = { orders: [createMockTableOrder({ name: '' })] }
 
@@ -73,7 +73,7 @@ describe('Unit: UpdateTableUseCase', () => {
     )
   })
 
-  it('should throw error when order has invalid price', async () => {
+  it('deve lançar erro quando pedido possui preço inválido', async () => {
     const mockUser = createMockUser()
     const changes = { orders: [createMockTableOrder({ price: NaN })] }
 
@@ -84,7 +84,7 @@ describe('Unit: UpdateTableUseCase', () => {
     )
   })
 
-  it('should throw error when order quantity is zero', async () => {
+  it('deve lançar erro quando quantidade do pedido é zero', async () => {
     const mockUser = createMockUser()
     const changes = { orders: [createMockTableOrder({ quantity: 0 })] }
 
@@ -95,7 +95,7 @@ describe('Unit: UpdateTableUseCase', () => {
     )
   })
 
-  it('should throw error when order quantity is negative', async () => {
+  it('deve lançar erro quando quantidade do pedido é negativa', async () => {
     const mockUser = createMockUser()
     const changes = { orders: [createMockTableOrder({ quantity: -1 })] }
 
@@ -106,7 +106,7 @@ describe('Unit: UpdateTableUseCase', () => {
     )
   })
 
-  it('should accept order with price zero', async () => {
+  it('deve aceitar pedido com preço zero', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const changes = { orders: [createMockTableOrder({ price: 0 })] }
@@ -119,7 +119,7 @@ describe('Unit: UpdateTableUseCase', () => {
     expect(result).toEqual(mockTable)
   })
 
-  it('should allow updating without orders', async () => {
+  it('deve permitir atualização sem pedidos', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const changes = { name: 'Mesa Atualizada' }

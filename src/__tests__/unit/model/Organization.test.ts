@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { Organization } from '../../../model/entities/Organization'
 import { createMockOrganization } from '../../mocks/factories'
 
-describe('Unit: Organization Entity', () => {
-  it('should create an organization with required properties', () => {
+describe('Unitário: Entidade Organização', () => {
+  it('deve criar organização com propriedades obrigatórias', () => {
     const organization = createMockOrganization()
 
     expect(organization).toBeDefined()
@@ -12,7 +12,7 @@ describe('Unit: Organization Entity', () => {
     expect(organization.createdAt).toBeDefined()
   })
 
-  it('should have correct required properties', () => {
+  it('deve possuir propriedades obrigatórias corretas', () => {
     const organization = createMockOrganization()
 
     expect(organization.id).toBe('org-123')
@@ -20,7 +20,7 @@ describe('Unit: Organization Entity', () => {
     expect(organization.createdAt).toBeGreaterThan(0)
   })
 
-  it('should have optional properties: name, ownerUserId, ownerEmail', () => {
+  it('deve possuir propriedades opcionais: name, ownerUserId, ownerEmail', () => {
     const organization = createMockOrganization()
 
     expect(organization.name).toBe('Meu Restaurante')
@@ -28,7 +28,7 @@ describe('Unit: Organization Entity', () => {
     expect(organization.ownerEmail).toBe('owner@example.com')
   })
 
-  it('should create organization with minimal properties', () => {
+  it('deve criar organização com propriedades mínimas', () => {
     const minimalOrganization: Organization = {
       id: 'org-001',
       accessCode: 'ABC123',
@@ -42,7 +42,7 @@ describe('Unit: Organization Entity', () => {
     expect(minimalOrganization.ownerEmail).toBeUndefined()
   })
 
-  it('should have accessCode for access control', () => {
+  it('deve possuir accessCode para controle de acesso', () => {
     const organization = createMockOrganization()
 
     expect(organization.accessCode).toBeDefined()
@@ -50,7 +50,7 @@ describe('Unit: Organization Entity', () => {
     expect(typeof organization.accessCode).toBe('string')
   })
 
-  it('should have timestamps', () => {
+  it('deve possuir timestamps', () => {
     const now = Date.now()
     const organization = createMockOrganization()
 
@@ -58,7 +58,7 @@ describe('Unit: Organization Entity', () => {
     expect(organization.createdAt).toBeLessThanOrEqual(now + 1000)
   })
 
-  it('should update organization properties', () => {
+  it('deve atualizar propriedades da organização', () => {
     const originalOrganization = createMockOrganization()
     const updatedOrganization: Organization = {
       ...originalOrganization,
@@ -72,7 +72,7 @@ describe('Unit: Organization Entity', () => {
     expect(updatedOrganization.createdAt).toBe(originalOrganization.createdAt)
   })
 
-  it('should create organization with partial overrides', () => {
+  it('deve criar organização com sobrescritas parciais', () => {
     const organization = createMockOrganization({
       name: 'Pizzaria da Esquina',
       ownerEmail: 'pizza@example.com',
@@ -84,7 +84,7 @@ describe('Unit: Organization Entity', () => {
     expect(organization.accessCode).toBe('123456789')
   })
 
-  it('should preserve accessCode as unique identifier', () => {
+  it('deve preservar accessCode como identificador único', () => {
     const org1 = createMockOrganization({ accessCode: 'CODE001' })
     const org2 = createMockOrganization({ accessCode: 'CODE002' })
 
@@ -93,7 +93,7 @@ describe('Unit: Organization Entity', () => {
     expect(org1.accessCode).not.toBe(org2.accessCode)
   })
 
-  it('should handle owner information correctly', () => {
+  it('deve tratar informações do proprietário corretamente', () => {
     const organization = createMockOrganization({
       ownerUserId: 'user-456',
       ownerEmail: 'owner456@example.com',
@@ -103,7 +103,7 @@ describe('Unit: Organization Entity', () => {
     expect(organization.ownerEmail).toBe('owner456@example.com')
   })
 
-  it('should validate email format in ownerEmail', () => {
+  it('deve validar formato de e-mail em ownerEmail', () => {
     const validEmails = [
       'owner@example.com',
       'user.name@domain.co.uk',

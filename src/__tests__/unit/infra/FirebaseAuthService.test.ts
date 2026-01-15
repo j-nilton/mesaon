@@ -54,7 +54,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // login
   // ------------------------------
-  it('should successfully log you in.', async () => {
+  it('deve realizar login com sucesso.', async () => {
     vi.mocked(signInWithEmailAndPassword).mockResolvedValue({
       user: {
         uid: 'user-1',
@@ -71,7 +71,7 @@ describe('FirebaseAuthService', () => {
     expect(user.name).toBe('Teste')
   })
 
-  it('should throw an AuthError when login fails.', async () => {
+  it('deve lançar AuthError quando o login falhar.', async () => {
     vi.mocked(signInWithEmailAndPassword).mockRejectedValue({ code: 'auth/wrong-password' })
 
     await expect(
@@ -82,7 +82,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // register
   // ------------------------------
-  it('should successfully register a user.', async () => {
+  it('deve registrar um usuário com sucesso.', async () => {
     vi.mocked(createUserWithEmailAndPassword).mockResolvedValue({
       user: {
         uid: 'user-2',
@@ -100,7 +100,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // logout
   // ------------------------------
-  it('should log out', async () => {
+  it('deve realizar logout', async () => {
     await service.logout()
     expect(signOut).toHaveBeenCalled()
   })
@@ -108,7 +108,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // getCurrentUser
   // ------------------------------
-  it.skip('should return the current user if it exists.', async () => {
+  it.skip('deve retornar o usuário atual se existir.', async () => {
     vi.mocked(onAuthStateChanged).mockImplementation((_, callback: any) => {
       callback({
         uid: 'user-3',
@@ -124,7 +124,7 @@ describe('FirebaseAuthService', () => {
     expect(user?.id).toBe('user-3')
   })
 
-  it.skip('should return null when there is no authenticated user.', async () => {
+  it.skip('deve retornar null quando não houver usuário autenticado.', async () => {
     vi.mocked(onAuthStateChanged).mockImplementation((_, callback: any) => {
       callback(null)
       return () => {}
@@ -138,7 +138,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // setUserOrganization
   // ------------------------------
-  it('should set the users organizationId.', async () => {
+  it('deve definir o organizationId do usuário.', async () => {
     vi.mocked(getDoc).mockResolvedValue({
       exists: (): any => false,
     } as any)
@@ -151,7 +151,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // addCodeToHistory
   // ------------------------------
-  it('should add code to the users history.', async () => {
+  it('deve adicionar código ao histórico do usuário.', async () => {
     await service.addCodeToHistory('user-1', '123456789')
 
     expect(addDoc).toHaveBeenCalled()
@@ -160,13 +160,13 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // resetPassword
   // ------------------------------
-  it('should send a password reset email.', async () => {
+  it('deve enviar e-mail de recuperação de senha.', async () => {
     await service.resetPassword('email@email.com')
 
     expect(sendPasswordResetEmail).toHaveBeenCalled()
   })
 
-  it('should throw an error if the password reset fails.', async () => {
+  it('deve lançar erro se redefinição de senha falhar.', async () => {
     vi.mocked(sendPasswordResetEmail).mockRejectedValue({ code: 'auth/invalid-email' })
 
     await expect(
@@ -177,7 +177,7 @@ describe('FirebaseAuthService', () => {
   // ------------------------------
   // sendVerificationEmail
   // ------------------------------
-  it('should throw an error if there is no authenticated user.', async () => {
+  it('deve lançar erro se não houver usuário autenticado.', async () => {
     await expect(
       service.sendVerificationEmail()
     ).rejects.toBeInstanceOf(AuthError)

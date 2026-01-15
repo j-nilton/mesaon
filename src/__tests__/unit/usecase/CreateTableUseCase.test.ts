@@ -3,7 +3,7 @@ import { CreateTableUseCase } from '../../../usecase/CreateTableUseCase'
 import { createMockAuthService, createMockTableService } from '../../mocks'
 import { createMockUser, createMockTable } from '../../mocks/factories'
 
-describe('Unit: CreateTableUseCase', () => {
+describe('Unitário: CreateTableUseCase', () => {
   let useCase: CreateTableUseCase
   let authService: ReturnType<typeof createMockAuthService>
   let tableService: ReturnType<typeof createMockTableService>
@@ -14,7 +14,7 @@ describe('Unit: CreateTableUseCase', () => {
     useCase = new CreateTableUseCase(tableService, authService)
   })
 
-  it('should create a table with valid data', async () => {
+  it('deve criar mesa com dados válidos', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const input = { name: 'Mesa 1', waiterName: 'João' }
@@ -28,7 +28,7 @@ describe('Unit: CreateTableUseCase', () => {
     expect(tableService.create).toHaveBeenCalled()
   })
 
-  it('should throw error with invalid access code format', async () => {
+  it('deve lançar erro com formato inválido de código de acesso', async () => {
     const input = { name: 'Mesa 1' }
 
     await expect(useCase.execute('12345', input)).rejects.toThrow(
@@ -36,7 +36,7 @@ describe('Unit: CreateTableUseCase', () => {
     )
   })
 
-  it('should throw error when table name is empty', async () => {
+  it('deve lançar erro quando nome da mesa está vazio', async () => {
     const input = { name: '   ' }
 
     await expect(useCase.execute('123456789', input)).rejects.toThrow(
@@ -44,7 +44,7 @@ describe('Unit: CreateTableUseCase', () => {
     )
   })
 
-  it('should throw error when user is not authenticated', async () => {
+  it('deve lançar erro quando usuário não está autenticado', async () => {
     const input = { name: 'Mesa 1' }
 
     vi.mocked(authService.getCurrentUser).mockResolvedValue(null)
@@ -54,7 +54,7 @@ describe('Unit: CreateTableUseCase', () => {
     )
   })
 
-  it('should trim table name before creating', async () => {
+  it('deve aparar nome da mesa antes de criar', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable({ name: 'Mesa 1' })
     const input = { name: '  Mesa 1  ' }
@@ -72,7 +72,7 @@ describe('Unit: CreateTableUseCase', () => {
     )
   })
 
-  it('should trim optional fields', async () => {
+  it('deve aparar campos opcionais', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const input = { 
@@ -95,7 +95,7 @@ describe('Unit: CreateTableUseCase', () => {
     )
   })
 
-  it('should handle empty optional fields as undefined', async () => {
+  it('deve tratar campos opcionais vazios como undefined', async () => {
     const mockUser = createMockUser()
     const mockTable = createMockTable()
     const input = { 

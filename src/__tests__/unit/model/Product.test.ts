@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { Product, ProductCategory } from '../../../model/entities/Product'
 import { createMockProduct } from '../../mocks/factories'
 
-describe('Unit: Product Entity', () => {
-  it('should create a product with all properties', () => {
+describe('Unitário: Entidade Produto', () => {
+  it('deve criar produto com todas as propriedades', () => {
     const product = createMockProduct()
 
     expect(product).toBeDefined()
@@ -15,7 +15,7 @@ describe('Unit: Product Entity', () => {
     expect(product.createdAt).toBeDefined()
   })
 
-  it('should have correct required properties', () => {
+  it('deve possuir propriedades obrigatórias corretas', () => {
     const product = createMockProduct()
 
     expect(product.id).toBe('prod-123')
@@ -26,7 +26,7 @@ describe('Unit: Product Entity', () => {
     expect(product.createdAt).toBeGreaterThan(0)
   })
 
-  it('should accept valid product categories', () => {
+  it('deve aceitar categorias de produto válidas', () => {
     const categories: ProductCategory[] = ['Bebidas', 'Pizzas', 'Pratos', 'Petiscos', 'Sobremesas']
 
     categories.forEach((category) => {
@@ -35,7 +35,7 @@ describe('Unit: Product Entity', () => {
     })
   })
 
-  it('should have optional properties: description, imageUrl, updatedAt', () => {
+  it('deve possuir propriedades opcionais: description, imageUrl, updatedAt', () => {
     const product = createMockProduct({
       description: 'Custom description',
       imageUrl: 'https://example.com/image.jpg',
@@ -47,7 +47,7 @@ describe('Unit: Product Entity', () => {
     expect(product.updatedAt).toBeDefined()
   })
 
-  it('should create product with minimal properties', () => {
+  it('deve criar produto com propriedades mínimas', () => {
     const minimalProduct: Product = {
       id: 'prod-001',
       accessCode: 'ABC123',
@@ -64,14 +64,14 @@ describe('Unit: Product Entity', () => {
     expect(minimalProduct.updatedAt).toBeUndefined()
   })
 
-  it('should handle price as decimal number', () => {
+  it('deve tratar preço como número decimal', () => {
     const product = createMockProduct({ price: 99.99 })
 
     expect(product.price).toBe(99.99)
     expect(typeof product.price).toBe('number')
   })
 
-  it('should update product properties', () => {
+  it('deve atualizar propriedades do produto', () => {
     const originalProduct = createMockProduct()
     const updatedProduct: Product = {
       ...originalProduct,
@@ -86,7 +86,7 @@ describe('Unit: Product Entity', () => {
     expect(updatedProduct.id).toBe(originalProduct.id)
   })
 
-  it('should create product with partial overrides', () => {
+  it('deve criar produto com sobrescritas parciais', () => {
     const product = createMockProduct({
       name: 'Coca Cola',
       category: 'Bebidas',
@@ -99,7 +99,7 @@ describe('Unit: Product Entity', () => {
     expect(product.id).toBe('prod-123')
   })
 
-  it('should preserve accessCode consistency', () => {
+  it('deve preservar consistência de accessCode', () => {
     const product = createMockProduct({ accessCode: 'CODE123' })
 
     expect(product.accessCode).toBe('CODE123')

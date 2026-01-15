@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { User } from '../../../model/entities/User'
 import { createMockUser } from '../../mocks/factories'
 
-describe('Unit: User Entity', () => {
-  it('should create a user with all required properties', () => {
+describe('Unitário: Entidade Usuário', () => {
+  it('deve criar usuário com todas as propriedades obrigatórias', () => {
     const user = createMockUser()
 
     expect(user).toBeDefined()
@@ -11,14 +11,14 @@ describe('Unit: User Entity', () => {
     expect(user.email).toBeDefined()
   })
 
-  it('should have required properties: id and email', () => {
+  it('deve possuir propriedades obrigatórias: id e email', () => {
     const user = createMockUser()
 
     expect(user.id).toBe('user-123')
     expect(user.email).toBe('test@example.com')
   })
 
-  it('should have optional properties', () => {
+  it('deve possuir propriedades opcionais', () => {
     const user = createMockUser()
 
     expect(user.name).toBe('Test User')
@@ -27,7 +27,7 @@ describe('Unit: User Entity', () => {
     expect(user.emailVerified).toBe(true)
   })
 
-  it('should accept only valid roles', () => {
+  it('deve aceitar apenas papéis válidos', () => {
     const organizationUser = createMockUser({ role: 'organization' })
     const collaboratorUser = createMockUser({ role: 'collaborator' })
 
@@ -35,7 +35,7 @@ describe('Unit: User Entity', () => {
     expect(collaboratorUser.role).toBe('collaborator')
   })
 
-  it('should allow creating user without optional properties', () => {
+  it('deve permitir criar usuário sem propriedades opcionais', () => {
     const minimalUser: User = {
       id: 'user-001',
       email: 'minimal@example.com',
@@ -49,7 +49,7 @@ describe('Unit: User Entity', () => {
     expect(minimalUser.emailVerified).toBeUndefined()
   })
 
-  it('should update user properties', () => {
+  it('deve atualizar propriedades do usuário', () => {
     const user = createMockUser()
     const updatedUser: User = {
       ...user,
@@ -62,7 +62,7 @@ describe('Unit: User Entity', () => {
     expect(updatedUser.id).toBe(user.id)
   })
 
-  it('should create user with partial overrides', () => {
+  it('deve criar usuário com sobrescritas parciais', () => {
     const user = createMockUser({
       email: 'newemail@example.com',
       role: 'collaborator',

@@ -3,7 +3,7 @@ import { SubscribeTablesByCodeUseCase } from '../../../usecase/SubscribeTablesBy
 import { createMockTableService } from '../../mocks'
 import { createMockTable } from '../../mocks/factories'
 
-describe('Unit: SubscribeTablesByCodeUseCase', () => {
+describe('Unitário: SubscribeTablesByCodeUseCase', () => {
   let useCase: SubscribeTablesByCodeUseCase
   let tableService: ReturnType<typeof createMockTableService>
 
@@ -12,7 +12,7 @@ describe('Unit: SubscribeTablesByCodeUseCase', () => {
     useCase = new SubscribeTablesByCodeUseCase(tableService)
   })
 
-  it('should subscribe to tables by access code', () => {
+  it('deve assinar mesas por código de acesso', () => {
     const mockUnsubscribe = vi.fn()
     const mockOnChange = vi.fn()
 
@@ -24,7 +24,7 @@ describe('Unit: SubscribeTablesByCodeUseCase', () => {
     expect(tableService.subscribeByAccessCode).toHaveBeenCalledWith('123456789', mockOnChange)
   })
 
-  it('should throw error with invalid access code format', () => {
+  it('deve lançar erro com formato inválido de código de acesso', () => {
     const mockOnChange = vi.fn()
 
     expect(() => useCase.execute('12345', mockOnChange)).toThrow(
@@ -32,7 +32,7 @@ describe('Unit: SubscribeTablesByCodeUseCase', () => {
     )
   })
 
-  it('should throw error when access code is empty', () => {
+  it('deve lançar erro quando código de acesso está vazio', () => {
     const mockOnChange = vi.fn()
 
     expect(() => useCase.execute('', mockOnChange)).toThrow(
@@ -40,7 +40,7 @@ describe('Unit: SubscribeTablesByCodeUseCase', () => {
     )
   })
 
-  it('should return unsubscribe function', () => {
+  it('deve retornar função de unsubscribe', () => {
     const mockUnsubscribe = vi.fn()
     const mockOnChange = vi.fn()
 
@@ -53,7 +53,7 @@ describe('Unit: SubscribeTablesByCodeUseCase', () => {
     expect(mockUnsubscribe).toHaveBeenCalled()
   })
 
-  it('should not call service for invalid access code', () => {
+  it('deve não chamar serviço para código de acesso inválido', () => {
     const mockOnChange = vi.fn()
 
     expect(() => useCase.execute('abc', mockOnChange)).toThrow()

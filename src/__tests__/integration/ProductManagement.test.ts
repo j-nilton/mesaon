@@ -6,7 +6,7 @@ import { ListProductsByCodeUseCase } from '../../usecase/ListProductsByCodeUseCa
 import { createMockAuthService, createMockProductService } from '../mocks'
 import { createMockUser, createMockProduct } from '../mocks/factories'
 
-describe('Integration: Product Management', () => {
+describe('Integração: Gerenciamento de Produtos', () => {
   let authService: ReturnType<typeof createMockAuthService>
   let productService: ReturnType<typeof createMockProductService>
   let createProductUseCase: CreateProductUseCase
@@ -23,7 +23,7 @@ describe('Integration: Product Management', () => {
     listProductsByCodeUseCase = new ListProductsByCodeUseCase(productService)
   })
 
-  it('should create, list, update, and delete a product', async () => {
+  it('deve criar, listar, atualizar e excluir um produto', async () => {
     const mockUser = createMockUser()
     let mockProduct = createMockProduct()
 
@@ -64,7 +64,7 @@ describe('Integration: Product Management', () => {
     expect(productService.delete).toHaveBeenCalledWith('prod-123')
   })
 
-  it('should enforce authorization for product operations', async () => {
+  it('deve exigir autorização nas operações de produto', async () => {
     const unauthorizedUser = createMockUser({ organizationId: '999999999' })
 
     // Try to create with unauthorized user (organizationId doesn't match code)
@@ -89,7 +89,7 @@ describe('Integration: Product Management', () => {
     )
   })
 
-  it('should validate product data across operations', async () => {
+  it('deve validar dados do produto nas operações', async () => {
     const mockUser = createMockUser()
 
     // Create with invalid price
