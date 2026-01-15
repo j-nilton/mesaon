@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { User } from '../../model/entities/User'
-import { createMockUser } from '../mocks/factories'
+import { User } from '../../../model/entities/User'
+import { createMockUser } from '../../mocks/factories'
 
 describe('Unit: User Entity', () => {
   it('should create a user with all required properties', () => {

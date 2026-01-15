@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Table, TableOrder } from '../../model/entities/Table'
-import { createMockTable, createMockTableOrder } from '../mocks/factories'
+import { Table, TableOrder } from '../../../model/entities/Table'
+import { createMockTable, createMockTableOrder } from '../../mocks/factories'
 
 describe('Unit: Table Entity', () => {
   it('should create a table with required properties', () => {

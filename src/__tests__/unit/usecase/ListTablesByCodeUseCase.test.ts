@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { ListTablesByCodeUseCase } from '../../usecase/ListTablesByCodeUseCase'
-import { createMockTableService } from '../mocks'
-import { createMockTable } from '../mocks/factories'
+import { ListTablesByCodeUseCase } from '../../../usecase/ListTablesByCodeUseCase'
+import { createMockTableService } from '../../mocks'
+import { createMockTable } from '../../mocks/factories'
 
 describe('Unit: ListTablesByCodeUseCase', () => {
   let useCase: ListTablesByCodeUseCase

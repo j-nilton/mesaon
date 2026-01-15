@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Organization } from '../../model/entities/Organization'
-import { createMockOrganization } from '../mocks/factories'
+import { Organization } from '../../../model/entities/Organization'
+import { createMockOrganization } from '../../mocks/factories'
 
 describe('Unit: Organization Entity', () => {
   it('should create an organization with required properties', () => {

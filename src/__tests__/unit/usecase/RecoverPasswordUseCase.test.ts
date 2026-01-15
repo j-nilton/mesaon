@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { RecoverPasswordUseCase } from '../../usecase/RecoverPasswordUseCase'
-import { createMockAuthService } from '../mocks'
+import { RecoverPasswordUseCase } from '../../../usecase/RecoverPasswordUseCase'
+import { createMockAuthService } from '../../mocks'
 
 describe('Unit: RecoverPasswordUseCase', () => {
   let useCase: RecoverPasswordUseCase

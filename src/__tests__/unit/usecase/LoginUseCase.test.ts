@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { LoginUseCase } from '../../usecase/LoginUseCase'
-import { createMockAuthService } from '../mocks'
-import { createMockUser } from '../mocks/factories'
+import { LoginUseCase } from '../../../usecase/LoginUseCase'
+import { createMockAuthService } from '../../mocks'
+import { createMockUser } from '../../mocks/factories'
 
 describe('Unit: LoginUseCase', () => {
   let useCase: LoginUseCase

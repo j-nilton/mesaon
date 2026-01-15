@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { Product, ProductCategory } from '../../model/entities/Product'
-import { createMockProduct } from '../mocks/factories'
+import { Product, ProductCategory } from '../../../model/entities/Product'
+import { createMockProduct } from '../../mocks/factories'
 
 describe('Unit: Product Entity', () => {
   it('should create a product with all properties', () => {

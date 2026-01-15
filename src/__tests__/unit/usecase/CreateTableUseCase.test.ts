@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { CreateTableUseCase } from '../../usecase/CreateTableUseCase'
-import { createMockAuthService, createMockTableService } from '../mocks'
-import { createMockUser, createMockTable } from '../mocks/factories'
+import { CreateTableUseCase } from '../../../usecase/CreateTableUseCase'
+import { createMockAuthService, createMockTableService } from '../../mocks'
+import { createMockUser, createMockTable } from '../../mocks/factories'
 
 describe('Unit: CreateTableUseCase', () => {
   let useCase: CreateTableUseCase
