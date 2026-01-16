@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -15,10 +15,23 @@ import { container } from "../di/container";
 import { colors, typography } from "./theme/theme";
 import { Input } from "./components/Input";
 import { Button } from "./components/Button";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
+import { useAppState } from "./state/AppState";
+import { computeNextRoute } from "../usecase/computeNextRoute";
 
 export default function LoginScreen() {
   const viewModel = useLoginViewModel(container.getLoginUseCase());
+  const router = useRouter();
+  const { hydrated, isAuthenticated, accessCode } = useAppState();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    // Verificação de sessão/código ao abrir: redireciona para área correta
+    const next = computeNextRoute({ isAuthenticated, accessCode });
+    if (next !== '/') {
+      router.replace(next);
+    }
+  }, [hydrated, isAuthenticated, accessCode, router]);
 
   return (
     <KeyboardAvoidingView

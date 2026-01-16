@@ -72,7 +72,7 @@ export default function DashboardScreen() {
   const [editNotes, setEditNotes] = useState('')
   const { width, height } = useWindowDimensions()
   const scale = Math.min(Math.max(width / 375, 0.9), 1.1)
-  const { accessCode, setAccessCode, setRole } = useAppState()
+  const { accessCode, setAccessCode, setRole, setIsAuthenticated, setUser } = useAppState()
   const copyAnim = React.useRef(new Animated.Value(1)).current
   const modalAnim = React.useRef(new Animated.Value(0)).current
   const menuAnim = React.useRef(new Animated.Value(0)).current
@@ -180,6 +180,8 @@ export default function DashboardScreen() {
                         await container.getAuthService().logout()
                         setAccessCode(undefined)
                         setRole(undefined)
+                        setIsAuthenticated(false)
+                        setUser(undefined)
                         router.replace('/')
                       },
                     },

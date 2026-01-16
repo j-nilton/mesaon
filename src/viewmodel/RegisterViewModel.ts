@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { RegisterUseCase } from '../usecase/RegisterUseCase';
 import { ResendVerificationEmailUseCase } from '../usecase/ResendVerificationEmailUseCase';
 import { CheckEmailVerificationUseCase } from '../usecase/CheckEmailVerificationUseCase';
+import { GetCurrentUserProfileUseCase } from '../usecase/GetCurrentUserProfileUseCase';
 import { router } from 'expo-router';
 
 export const isValidEmail = (email: string) => {
@@ -62,7 +63,8 @@ export interface RegisterViewModel {
 export function useRegisterViewModel(
   registerUseCase: RegisterUseCase,
   resendUseCase: ResendVerificationEmailUseCase,
-  checkUseCase: CheckEmailVerificationUseCase
+  checkUseCase: CheckEmailVerificationUseCase,
+  getProfileUseCase: GetCurrentUserProfileUseCase
 ): RegisterViewModel {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -174,7 +176,9 @@ export function useRegisterViewModel(
     try {
       const verified = await checkUseCase.execute();
       if (verified) {
-        router.replace('/(authenticated)/standalone/collaborator');
+        const profile = await getProfileUseCase.execute();
+        const hasOrg = profile?.role === 'organization' && !!profile?.organizationId;
+        router.replace(hasOrg ? '/(authenticated)/(tabs)/dashboard' : '/(authenticated)/standalone/collaborator');
       } else {
         setErrorMessage('E-mail ainda não verificado.');
       }

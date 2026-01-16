@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { View, Text, StyleSheet, Image, Pressable, useWindowDimensions, TextInput, KeyboardAvoidingView, Platform } from 'react-native'
 import { colors, typography } from '../../theme/theme'
 import { container } from '../../../di/container'
@@ -13,7 +13,7 @@ export default function CollaboratorCodeStandalone() {
     container.getValidateAccessCodeUseCase(),
     container.getGenerateAccessCodeUseCase()
   )
-  const { setAccessCode } = useAppState()
+  const { isAuthenticated, accessCode, setAccessCode } = useAppState()
   const { width } = useWindowDimensions()
   const scale = Math.min(Math.max(width / 375, 0.85), 1.15)
 
@@ -42,6 +42,13 @@ export default function CollaboratorCodeStandalone() {
     // Copia somente dígitos para área de transferência
     await Clipboard.setStringAsync(c.replace(/\D/g, ''))
   }
+
+  useEffect(() => {
+    // Se já autenticado e há código persistido, evita exibir esta tela
+    if (isAuthenticated && accessCode) {
+      router.replace('/(authenticated)/(tabs)/dashboard')
+    }
+  }, [isAuthenticated, accessCode])
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={[styles.container, { paddingHorizontal: 24 * scale }]}>

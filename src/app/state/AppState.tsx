@@ -6,8 +6,13 @@ import { container } from '../../di/container';
 type Role = 'organization' | 'collaborator' | undefined;
 
 type AppState = {
+  isAuthenticated: boolean;
+  user?: { uid: string; email?: string };
   role: Role;
   accessCode?: string;
+  hydrated: boolean;
+  setIsAuthenticated: (v: boolean) => void;
+  setUser: (u?: { uid: string; email?: string }) => void;
   setRole: (r: Role) => void;
   setAccessCode: (c?: string) => void;
   loadInitialData: () => Promise<void>;
@@ -16,10 +21,19 @@ type AppState = {
 export const useAppState = create<AppState>()(
   persist(
     (set, get) => ({
+      isAuthenticated: false,
+      user: undefined,
       role: undefined,
       accessCode: undefined,
+      hydrated: false,
+      setIsAuthenticated: (v: boolean) => set({ isAuthenticated: v }),
+      setUser: (u?: { uid: string; email?: string }) => set({ user: u }),
       setRole: (r: Role) => set({ role: r }),
-      setAccessCode: (c?: string) => set({ accessCode: c }),
+      setAccessCode: (c?: string) => {
+        const sanitized = c?.trim();
+        const valid = sanitized && /^\d{9}$/.test(sanitized) ? sanitized : undefined;
+        set({ accessCode: valid });
+      },
       loadInitialData: async () => {
         try {
           const profile = await container.getCurrentUserProfileUseCase().execute();
@@ -40,6 +54,10 @@ export const useAppState = create<AppState>()(
       name: 'app-storage', 
       storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({ role: state.role, accessCode: state.accessCode }),
+      onRehydrateStorage: () => (state) => {
+        // Marca como hidratado após reidratação do persist
+        useAppState.setState({ hydrated: true });
+      },
     }
   )
 );

@@ -23,7 +23,8 @@ export default function RegisterScreen() {
   const viewModel = useRegisterViewModel(
     container.getRegisterUseCase(),
     container.getResendVerificationEmailUseCase(),
-    container.getCheckEmailVerificationUseCase()
+    container.getCheckEmailVerificationUseCase(),
+    container.getCurrentUserProfileUseCase()
   );
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
 
