@@ -6,10 +6,11 @@ export class LoginUseCase {
   constructor(private authService: AuthService) {}
 
   async execute(email: string, pass: string): Promise<User> {
+    // Valida campos obrigatórios
     if (!email || !pass) {
       throw new AuthError('E-mail e senha são obrigatórios.');
     }
-    // Aqui poderiam entrar outras regras de negócio (ex: verificar tentativas, logar analytics)
+    // Realiza login via serviço de autenticação
     return this.authService.login(email, pass);
   }
 }
