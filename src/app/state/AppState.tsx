@@ -11,10 +11,12 @@ type AppState = {
   role: Role;
   accessCode?: string;
   hydrated: boolean;
+  autoVerifyEnabled: boolean;
   setIsAuthenticated: (v: boolean) => void;
   setUser: (u?: { uid: string; email?: string }) => void;
   setRole: (r: Role) => void;
   setAccessCode: (c?: string) => void;
+  setAutoVerifyEnabled: (v: boolean) => void;
   loadInitialData: () => Promise<void>;
 };
 
@@ -26,6 +28,7 @@ export const useAppState = create<AppState>()(
       role: undefined,
       accessCode: undefined,
       hydrated: false,
+      autoVerifyEnabled: true,
       setIsAuthenticated: (v: boolean) => set({ isAuthenticated: v }),
       setUser: (u?: { uid: string; email?: string }) => set({ user: u }),
       setRole: (r: Role) => set({ role: r }),
@@ -34,6 +37,7 @@ export const useAppState = create<AppState>()(
         const valid = sanitized && /^\d{9}$/.test(sanitized) ? sanitized : undefined;
         set({ accessCode: valid });
       },
+      setAutoVerifyEnabled: (v: boolean) => set({ autoVerifyEnabled: v }),
       loadInitialData: async () => {
         try {
           const profile = await container.getCurrentUserProfileUseCase().execute();

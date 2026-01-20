@@ -192,7 +192,7 @@ export default function TableDetailsScreen() {
             <ScrollView
               contentContainerStyle={{
                 paddingHorizontal: 16,
-                paddingBottom: 16,
+                paddingBottom: 106,
                 paddingTop: 4,
               }}
             >
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 16,
     right: 16,
-    bottom: 60,
+    bottom: 90,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,

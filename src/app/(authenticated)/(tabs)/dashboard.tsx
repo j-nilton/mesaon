@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, TextInput, useWindowDimensions, Pressable, Alert, Modal, Animated, Easing, ScrollView, Platform, ToastAndroid } from 'react-native'
 import { colors, typography } from '../../theme/theme'
 import { container } from '../../../di/container'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
 import { router, usePathname } from 'expo-router'
 import { useAppState } from '../../state/AppState'
@@ -72,13 +72,14 @@ export default function DashboardScreen() {
   const [editNotes, setEditNotes] = useState('')
   const { width, height } = useWindowDimensions()
   const scale = Math.min(Math.max(width / 375, 0.9), 1.1)
-  const { accessCode, setAccessCode, setRole, setIsAuthenticated, setUser } = useAppState()
+  const { accessCode, setAccessCode, setRole, setIsAuthenticated, setUser, setAutoVerifyEnabled } = useAppState()
   const copyAnim = React.useRef(new Animated.Value(1)).current
   const modalAnim = React.useRef(new Animated.Value(0)).current
   const menuAnim = React.useRef(new Animated.Value(0)).current
   const kebabAnim = React.useRef(new Animated.Value(0)).current
   const queryDebounce = React.useRef<ReturnType<typeof setTimeout> | null>(null)
   const pathname = usePathname()
+  const prevFocusedRef = useRef<Element | null>(null)
   const vm = useTablesViewModel(
     container.getListTablesByCodeUseCase(),
     container.getCreateTableUseCase(),
@@ -148,6 +149,50 @@ export default function DashboardScreen() {
     }).start()
   }, [openMenuId])
 
+  useEffect(() => {
+    // Fecha ao navegar
+    setShowMenu(false)
+    Animated.timing(menuAnim, { toValue: 0, duration: 150, useNativeDriver: true }).start()
+  }, [pathname])
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && showMenu) {
+      const handler = (e: MouseEvent) => {
+        const el = document.getElementById('avatarMenuPopup')
+        const path = (e as any).composedPath ? (e as any).composedPath() : []
+        const inside = (el && (path.includes(el) || el.contains(e.target as Node))) || false
+        if (!inside) {
+          setShowMenu(false)
+          const prev = prevFocusedRef.current as any
+          if (prev && typeof prev.focus === 'function') {
+            prev.focus()
+          } else {
+            const btn = document.getElementById('avatarButton') as any
+            if (btn && typeof btn.focus === 'function') btn.focus()
+          }
+        }
+      }
+      document.addEventListener('click', handler, { capture: true })
+      return () => {
+        document.removeEventListener('click', handler, { capture: true })
+      }
+    }
+  }, [showMenu, Platform.OS])
+  useEffect(() => {
+    if (Platform.OS === 'web' && showMenu) {
+      const onWinScroll = () => {
+        if (showMenu) {
+          setShowMenu(false)
+          console.debug('[Popup] close by window scroll')
+        }
+      }
+      window.addEventListener('scroll', onWinScroll, { passive: true })
+      return () => {
+        window.removeEventListener('scroll', onWinScroll)
+      }
+    }
+  }, [showMenu])
+
   const role = profile?.role
   return (
     <View style={[styles.container]}>
@@ -162,13 +207,23 @@ export default function DashboardScreen() {
             style={{ flex: 1, color: colors.text.primary, fontSize: typography.size.md }}
           />
         </View>
-        <Pressable onPress={() => setShowMenu(v => !v)}>
+        <Pressable
+          nativeID="avatarButton"
+          accessibilityRole="button"
+          accessibilityLabel="Avatar"
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              prevFocusedRef.current = document.activeElement
+            }
+            setShowMenu(v => !v)
+          }}
+        >
           <Ionicons name="person-circle-outline" size={36 * scale} color={colors.text.secondary} />
         </Pressable>
         {showMenu && (
           <>
             <Pressable style={StyleSheet.absoluteFill} onPress={() => handlePopupClose(setShowMenu)} />
-            <Animated.View style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]}>
+            <Animated.View nativeID="avatarMenuPopup" style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0, 1], outputRange: [0.95, 1] }) }] }]}>
               <Pressable
                 onPress={() => {
                   Alert.alert('Sair', 'Deseja realmente sair?', [
@@ -182,6 +237,7 @@ export default function DashboardScreen() {
                         setRole(undefined)
                         setIsAuthenticated(false)
                         setUser(undefined)
+                        setAutoVerifyEnabled(false)
                         router.replace('/')
                       },
                     },
@@ -213,9 +269,13 @@ export default function DashboardScreen() {
           {vm.tables.length === 0 ? (
             <Text style={styles.empty}>Nenhuma mesa cadastrada</Text>
           ) : (
-            <ScrollView contentContainerStyle={[styles.list, { paddingBottom: 370 }]} onScroll={(e) => {
+            <ScrollView testID="dashboardScroll" contentContainerStyle={[styles.list, { paddingBottom: 370 }]} onScroll={(e) => {
               const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
               setShowFab(shouldShowFab(contentSize.height, layoutMeasurement.height, contentOffset.y))
+              if (showMenu) {
+                setShowMenu(false)
+                console.debug('[Popup] close by scroll event')
+              }
             }} scrollEventThrottle={16}>
               {vm.tables.map((t, idx) => (
                   <TableRow 

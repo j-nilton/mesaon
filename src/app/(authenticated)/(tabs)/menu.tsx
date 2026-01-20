@@ -12,7 +12,7 @@ import { Picker } from '@react-native-picker/picker'
 import { router, usePathname } from 'expo-router'
 
 export default function MenuScreen() {
-  const { accessCode, role, setAccessCode, setRole } = useAppState()
+  const { accessCode, role, setAccessCode, setRole, setAutoVerifyEnabled } = useAppState()
   const [showMenu, setShowMenu] = useState(false)
   const [showFab, setShowFab] = useState(true)
   const vm = useMenuViewModel(
@@ -33,6 +33,7 @@ export default function MenuScreen() {
   const queryDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
   const pendingClear = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [query, setQuery] = useState('')
+  const prevFocusedRef = useRef<Element | null>(null)
   const copyCode = async () => {
     if (!accessCode) return
     // Copia somente dígitos para área de transferência
@@ -70,6 +71,45 @@ export default function MenuScreen() {
     }, 300)
   }
 
+  useEffect(() => {
+    if (Platform.OS === 'web' && showMenu) {
+      const handler = (e: MouseEvent) => {
+        const el = document.getElementById('avatarMenuPopup')
+        const path = (e as any).composedPath ? (e as any).composedPath() : []
+        const inside = (el && (path.includes(el) || el.contains(e.target as Node))) || false
+        if (!inside) {
+          setShowMenu(false)
+          const prev = prevFocusedRef.current as any
+          if (prev && typeof prev.focus === 'function') {
+            prev.focus()
+          } else {
+            const btn = document.getElementById('avatarButton') as any
+            if (btn && typeof btn.focus === 'function') btn.focus()
+          }
+        }
+      }
+      document.addEventListener('click', handler, { capture: true })
+      return () => {
+        document.removeEventListener('click', handler, { capture: true })
+      }
+    }
+  }, [showMenu, Platform.OS])
+
+  useEffect(() => {
+    if (Platform.OS === 'web' && showMenu) {
+      const onWinScroll = () => {
+        if (showMenu) {
+          setShowMenu(false)
+          console.debug('[Popup] close by window scroll')
+        }
+      }
+      window.addEventListener('scroll', onWinScroll, { passive: true })
+      return () => {
+        window.removeEventListener('scroll', onWinScroll)
+      }
+    }
+  }, [showMenu])
+
   return (
     <View style={styles.container}>
       <View style={[styles.topBar, { paddingHorizontal: 16, marginTop: 32 }]}>
@@ -83,13 +123,23 @@ export default function MenuScreen() {
             style={{ flex: 1, color: colors.text.primary, fontSize: typography.size.md }}
           />
         </View>
-        <Pressable onPress={() => setShowMenu(v => !v)}>
+        <Pressable
+          nativeID="avatarButton"
+          accessibilityRole="button"
+          accessibilityLabel="Avatar"
+          onPress={() => {
+            if (Platform.OS === 'web') {
+              prevFocusedRef.current = document.activeElement
+            }
+            setShowMenu(v => !v)
+          }}
+        >
           <Ionicons name="person-circle-outline" size={36 * scale} color={colors.text.secondary} />
         </Pressable>
         {showMenu && (
           <>
             <Pressable style={StyleSheet.absoluteFill} onPress={() => handlePopupClose(setShowMenu)} />
-            <Animated.View style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0,1], outputRange: [0.98,1] }) }] }]}>
+            <Animated.View nativeID="avatarMenuPopup" style={[styles.menu, { opacity: menuAnim, transform: [{ scale: menuAnim.interpolate({ inputRange: [0,1], outputRange: [0.98,1] }) }] }]}>
               <Pressable
                 onPress={() => {
                   Alert.alert('Sair', 'Deseja realmente sair?', [
@@ -101,6 +151,7 @@ export default function MenuScreen() {
                         await container.getAuthService().logout()
                         setAccessCode(undefined)
                         setRole(undefined)
+                        setAutoVerifyEnabled(false)
                         router.replace('/')
                       },
                     },
@@ -137,10 +188,14 @@ export default function MenuScreen() {
       ) : vm.products.length === 0 ? (
         <Text style={styles.empty}>Sem produtos cadastrados</Text>
       ) : (
-        <ScrollView contentContainerStyle={{ paddingHorizontal: 4, paddingVertical: 16 }} onScroll={(e) => {
+        <ScrollView testID="menuScroll" contentContainerStyle={{ paddingHorizontal: 4, paddingVertical: 16 }} onScroll={(e) => {
           const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent
           const nearBottom = contentOffset.y + layoutMeasurement.height >= contentSize.height - 24
           setShowFab(!nearBottom)
+          if (showMenu) {
+            setShowMenu(false)
+            console.debug('[Popup] close by scroll event')
+          }
         }} scrollEventThrottle={16}>
           {vm.products
             .slice()

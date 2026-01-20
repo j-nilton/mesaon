@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,9 @@ import {
   Platform,
   ScrollView,
   Alert,
+  ActivityIndicator,
+  Animated,
+  Easing,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useLoginViewModel } from "../viewmodel/LoginViewModel";
@@ -22,16 +25,112 @@ import { computeNextRoute } from "../usecase/computeNextRoute";
 export default function LoginScreen() {
   const viewModel = useLoginViewModel(container.getLoginUseCase());
   const router = useRouter();
-  const { hydrated, isAuthenticated, accessCode } = useAppState();
+  const { hydrated, isAuthenticated, accessCode, autoVerifyEnabled } = useAppState();
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState<string>("");
+  const [verifyError, setVerifyError] = useState<string>("");
+  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const startOverlay = (message: string) => {
+    setVerifyMessage(message);
+    setIsVerifying(true);
+    Animated.timing(overlayOpacity, {
+      toValue: 1,
+      duration: 240,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start();
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    timeoutRef.current = setTimeout(() => {
+      setVerifyError("Falha ao recuperar acesso. Tente novamente.");
+      Animated.timing(overlayOpacity, {
+        toValue: 0,
+        duration: 200,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }).start(() => {
+        setIsVerifying(false);
+      });
+      Alert.alert("Tempo excedido", "Não foi possível verificar as credenciais no tempo esperado.");
+    }, 6000);
+  };
+
+  const stopOverlay = () => {
+    if (!isVerifying) return;
+    Animated.timing(overlayOpacity, {
+      toValue: 0,
+      duration: 200,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: true,
+    }).start(() => {
+      setIsVerifying(false);
+      setVerifyMessage("");
+    });
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+  };
 
   useEffect(() => {
-    if (!hydrated) return;
-    // Verificação de sessão/código ao abrir: redireciona para área correta
-    const next = computeNextRoute({ isAuthenticated, accessCode });
-    if (next !== '/') {
-      router.replace(next);
-    }
-  }, [hydrated, isAuthenticated, accessCode, router]);
+    let mounted = true;
+    const checkAndMaybeOverlay = async () => {
+      try {
+        if (!hydrated) {
+          setVerifyError("");
+          // Consulta backend: exibe overlay apenas se há usuário e verificação habilitada
+          const user = await container.getAuthService().getCurrentUser();
+          if (mounted && user && autoVerifyEnabled) {
+            startOverlay("Recuperando acesso...");
+          }
+        } else {
+          stopOverlay();
+        }
+      } catch (e) {
+        // Falha backend: não exibir overlay e mostrar erro discreto
+        setVerifyError("Não foi possível verificar credenciais no momento.");
+      }
+    };
+    checkAndMaybeOverlay();
+    return () => {
+      mounted = false;
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
+  }, [hydrated, autoVerifyEnabled]);
+
+  useEffect(() => {
+    let mounted = true;
+    const verifyAndRoute = async () => {
+      if (!hydrated) return;
+      try {
+        const user = await container.getAuthService().getCurrentUser();
+        if (mounted && user && autoVerifyEnabled) {
+          startOverlay("Verificando credenciais...");
+        }
+        const next = computeNextRoute({ isAuthenticated, accessCode });
+        if (next !== '/') {
+          stopOverlay();
+          router.replace(next);
+        }
+        if (next === '/') {
+          stopOverlay();
+        }
+      } catch (e) {
+        // Falha backend: evitar overlay e seguir com UI
+        stopOverlay();
+        setVerifyError("Erro ao consultar credenciais. Por favor, continue o login.");
+      }
+    };
+    verifyAndRoute();
+    return () => { mounted = false; };
+  }, [hydrated, isAuthenticated, accessCode, router, autoVerifyEnabled]);
 
   return (
     <KeyboardAvoidingView
@@ -39,6 +138,16 @@ export default function LoginScreen() {
       style={styles.container}
     >
       <StatusBar style="dark" />
+      {isVerifying && (
+        <Animated.View
+          style={[styles.overlay, { opacity: overlayOpacity }]}
+          pointerEvents="none"
+          accessibilityLiveRegion="polite"
+        >
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.overlayText}>{verifyMessage}</Text>
+        </Animated.View>
+      )}
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
@@ -47,7 +156,6 @@ export default function LoginScreen() {
           <Text style={styles.welcomeText}>Seja Bem-vindo!</Text>
 
           <View style={styles.logoContainer}>
-            {/* Placeholder para a logo - na prática usaríamos require('../assets/logoMesaOn.png') */}
             <Image
               source={require("../../assets/logoMesaOn.png")}
               style={styles.logo}
@@ -57,6 +165,8 @@ export default function LoginScreen() {
 
           <Text style={styles.actionText}>Faça seu login</Text>
         </View>
+
+        {!!verifyError && <Text style={styles.errorText}>{verifyError}</Text>}
 
         <View style={styles.form}>
           <Input
@@ -110,6 +220,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  overlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.75)",
+    zIndex: 10,
+  },
+  overlayText: {
+    marginTop: 12,
+    color: colors.text.primary,
+    fontSize: typography.size.md,
+    fontWeight: "600",
   },
   scrollContent: {
     flexGrow: 1,
