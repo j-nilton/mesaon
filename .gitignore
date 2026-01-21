@@ -3,11 +3,11 @@
 # dependencies
 node_modules/
 .trae/
+android/
 CHANGELOG.md
 android/app/google-services.json
 .env
 coverage/
-android/
 
 # Diagramas em formato .puml
 diagramas/arquitetura_camadas.puml
