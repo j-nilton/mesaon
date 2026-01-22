@@ -10,6 +10,7 @@ import { useTablesViewModel } from '../../../viewmodel/TablesViewModel'
 import { useCreateTableViewModel } from '../../../viewmodel/CreateTableViewModel'
 import { calculateMenuPosition, shouldShowFab, Rect, handlePopupClose } from '../../../viewmodel/DashboardUtils'
 import { Table } from '../../../model/entities/Table'
+import { filterTablesByPriceRange, formatCurrency, sortTablesByPrice } from '../../../viewmodel/priceUtils'
 
 const TableRow = ({ 
   table: t, 
@@ -39,7 +40,7 @@ const TableRow = ({
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <View style={styles.totalPill}>
             <Text style={styles.totalPillText}>
-              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(t.total || 0)}
+              {formatCurrency(t.total || 0)}
             </Text>
           </View>
           <View ref={iconRef} collapsable={false}>
@@ -90,6 +91,10 @@ export default function DashboardScreen() {
   )
   const createVM = useCreateTableViewModel(container.getCreateTableUseCase(), accessCode)
   const formattedCode = accessCode ? `${accessCode.slice(0,3)} - ${accessCode.slice(3,6)} - ${accessCode.slice(6,9)}` : undefined
+  const [sortAsc, setSortAsc] = useState(true)
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [minPrice, setMinPrice] = useState<string>('')
+  const [maxPrice, setMaxPrice] = useState<string>('') 
   
   const onQueryChange = (text: string) => {
     if (queryDebounce.current) clearTimeout(queryDebounce.current)
@@ -98,6 +103,13 @@ export default function DashboardScreen() {
       vm.setQuery(text) // Aplica o filtro no ViewModel após o debounce
     }, 300)
   }
+  
+  const displayedTables = React.useMemo(() => {
+    const min = minPrice.trim() ? Number(minPrice.replace(',', '.')) : undefined
+    const max = maxPrice.trim() ? Number(maxPrice.replace(',', '.')) : undefined
+    const filtered = filterTablesByPriceRange(vm.tables, min, max)
+    return sortTablesByPrice(filtered, sortAsc)
+  }, [vm.tables, minPrice, maxPrice, sortAsc])
   
   const copyCode = async () => {
     if (!accessCode) return
@@ -264,7 +276,62 @@ export default function DashboardScreen() {
         <Text style={styles.empty}>Carregando...</Text>
       ) : (
         <View>
-          <Text style={styles.title}>Mesas</Text>
+          <View style={styles.titleRow}>
+            <Text style={styles.title}>Mesas</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setSortAsc(v => !v)}
+                style={({ pressed }) => [{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, backgroundColor: '#EFEAE2' }, pressed ? { opacity: 0.8 } : null]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Ionicons name={sortAsc ? 'arrow-up' : 'arrow-down'} size={16} color={colors.text.secondary} />
+                  <Text style={{ color: colors.text.secondary, fontSize: typography.size.sm }}>{sortAsc ? 'Crescente' : 'Decrescente'}</Text>
+                </View>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setFilterOpen(v => !v)}
+                style={({ pressed }) => [{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, backgroundColor: '#EFEAE2' }, pressed ? { opacity: 0.8 } : null]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Ionicons name="filter" size={16} color={colors.text.secondary} />
+                  <Text style={{ color: colors.text.secondary, fontSize: typography.size.sm }}>Preço</Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+          {filterOpen && (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4, marginTop: 4 }}>
+              <View style={[styles.inputBox, { flex: 1 }]}>
+                <TextInput
+                  placeholder="Min"
+                  placeholderTextColor={colors.text.secondary}
+                  keyboardType="numeric"
+                  value={minPrice}
+                  onChangeText={setMinPrice}
+                  style={styles.input}
+                />
+              </View>
+              <View style={[styles.inputBox, { flex: 1 }]}>
+                <TextInput
+                  placeholder="Max"
+                  placeholderTextColor={colors.text.secondary}
+                  keyboardType="numeric"
+                  value={maxPrice}
+                  onChangeText={setMaxPrice}
+                  style={styles.input}
+                />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => { setMinPrice(''); setMaxPrice('') }}
+                style={({ pressed }) => [{ paddingHorizontal: 12, paddingVertical: 10, borderRadius: 8, backgroundColor: '#EFEAE2' }, pressed ? { opacity: 0.8 } : null]}
+              >
+                <Text style={{ color: colors.text.secondary, fontSize: typography.size.sm }}>Limpar</Text>
+              </Pressable>
+            </View>
+          )}
           {vm.errorMessage ? <Text style={styles.error}>{vm.errorMessage}</Text> : null}
           {vm.tables.length === 0 ? (
             <Text style={styles.empty}>Nenhuma mesa cadastrada</Text>
@@ -277,7 +344,7 @@ export default function DashboardScreen() {
                 console.debug('[Popup] close by scroll event')
               }
             }} scrollEventThrottle={16}>
-              {vm.tables.map((t, idx) => (
+              {displayedTables.map((t, idx) => (
                   <TableRow 
                     key={t.id} 
                     table={t} 
@@ -574,6 +641,7 @@ const styles = StyleSheet.create({
   tableNotes: { color: colors.text.secondary, marginTop: 2 },
   totalPill: { marginTop: 2, backgroundColor: '#E6F3E6', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 12, alignSelf: 'flex-end' },
   totalPillText: { color: '#3A8F3A', fontWeight: '700' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   inputBox: { backgroundColor: '#EDEAE4', borderColor: colors.border, borderWidth: 1, borderRadius: 8 },
   input: { paddingHorizontal: 12, paddingVertical: 12, color: colors.text.primary, fontSize: typography.size.md },
   fab: {

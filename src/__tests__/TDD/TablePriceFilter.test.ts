@@ -1,22 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { Table } from '../../model/entities/Table';
+import { formatCurrency as fmtCurrency, sortTablesByPrice as sortByPrice, filterTablesByPriceRange as filterByPriceRange } from '../../viewmodel/priceUtils';
 
-// Helper functions that we expect to implement
-// Ideally these would be in a utility file or ViewModel
-const formatCurrency = (value: number): string => {
-    // Placeholder implementation that will be replaced
-    throw new Error("Not implemented");
-};
+// Helper functions delegating to implementation
+const formatCurrency = (value: number): string => fmtCurrency(value);
 
-const sortTablesByPrice = (tables: Table[], ascending: boolean): Table[] => {
-    // Placeholder implementation that will be replaced
-    throw new Error("Not implemented");
-};
+const sortTablesByPrice = (tables: Table[], ascending: boolean): Table[] => sortByPrice(tables, ascending);
 
-const filterTablesByPriceRange = (tables: Table[], min?: number, max?: number): Table[] => {
-    // Placeholder implementation that will be replaced
-    throw new Error("Not implemented");
-};
+const filterTablesByPriceRange = (tables: Table[], min?: number, max?: number): Table[] => filterByPriceRange(tables, min, max);
 
 describe('Table Price Filter & Sorting (TDD)', () => {
   // Mock data
@@ -31,20 +22,20 @@ describe('Table Price Filter & Sorting (TDD)', () => {
   describe('Sorting', () => {
     it('should sort tables by total price in ascending order', () => {
       const sorted = sortTablesByPrice(mockTables, true);
-      
+
       // Undefined/Zero should be handled (usually at the start or end, let's assume start for low value)
       // Order expected: 0/undefined -> 50 -> 100 -> 200
-      
+
       // Filter out undefined for simple check if needed, or define behavior
       // Let's assume undefined is treated as 0
-      
+
       const prices = sorted.map(t => t.total || 0);
       expect(prices).toEqual([0, 0, 50, 100, 200]);
     });
 
     it('should sort tables by total price in descending order', () => {
       const sorted = sortTablesByPrice(mockTables, false);
-      
+
       const prices = sorted.map(t => t.total || 0);
       expect(prices).toEqual([200, 100, 50, 0, 0]);
     });
@@ -60,9 +51,9 @@ describe('Table Price Filter & Sorting (TDD)', () => {
 
   describe('Filtering (Optional but good for Price Filter feature)', () => {
     it('should filter tables within a price range', () => {
-        const filtered = filterTablesByPriceRange(mockTables, 60, 150);
-        expect(filtered.length).toBe(1);
-        expect(filtered[0].id).toBe('1'); // Total 100
+      const filtered = filterTablesByPriceRange(mockTables, 60, 150);
+      expect(filtered.length).toBe(1);
+      expect(filtered[0].id).toBe('1'); // Total 100
     });
   });
 });
