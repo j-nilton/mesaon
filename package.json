@@ -34,8 +34,10 @@
   "devDependencies": {
     "@testing-library/react-native": "^13.3.3",
     "@types/react": "~19.1.0",
+    "@types/react-dom": "^19.2.3",
     "@vitest/coverage-v8": "^4.0.17",
     "jsdom": "^27.4.0",
+    "react-dom": "^19.2.3",
     "react-test-renderer": "^19.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.17"
