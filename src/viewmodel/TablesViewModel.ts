@@ -18,6 +18,8 @@ export interface TablesViewModel {
   release: (id: string) => Promise<void>;
   remove: (id: string) => Promise<void>;
   canCreate: boolean;
+  clearAll: () => Promise<void>;
+  canClearAll: boolean;
 }
 
 export function useTablesViewModel(
@@ -37,12 +39,12 @@ export function useTablesViewModel(
   const filteredTables = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return tables
-    return tables.filter(t => 
-      t.name.toLowerCase().includes(q) || 
+    return tables.filter(t =>
+      t.name.toLowerCase().includes(q) ||
       (t.waiterName || '').toLowerCase().includes(q)
     )
   }, [tables, query])
-  
+
   const load = async (): Promise<void> => {
     if (!accessCode) return
     setLoading(true)
@@ -133,6 +135,9 @@ export function useTablesViewModel(
   }
 
   const canCreate = useMemo(() => !!nameInput.trim(), [nameInput])
+  const canClearAll = useMemo(() => {
+    return tables.some(t => (t.orders?.length || 0) > 0 || (t.total || 0) > 0)
+  }, [tables])
 
   return {
     tables: filteredTables,
@@ -147,5 +152,26 @@ export function useTablesViewModel(
     release,
     remove,
     canCreate,
+    async clearAll() {
+      setLoading(true)
+      setErrorMessage('')
+      try {
+        const occupied = tables.filter(t => (t.orders?.length || 0) > 0 || (t.total || 0) > 0)
+        const updatedList = await Promise.all(
+          occupied.map(t => updateUC.execute(t.id, { orders: [] }))
+        )
+        setTables(prev =>
+          prev.map(t => {
+            const u = updatedList.find(x => x.id === t.id)
+            return u ? u : t
+          })
+        )
+      } catch (e: any) {
+        setErrorMessage(e?.message || 'Falha ao liberar todas as mesas.')
+      } finally {
+        setLoading(false)
+      }
+    },
+    canClearAll,
   }
 }

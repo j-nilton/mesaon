@@ -263,10 +263,10 @@ export default function DashboardScreen() {
         )}
       </View>
       {formattedCode && (
-        <View style={{ alignItems: 'center', marginTop: 8 }}>
+        <View style={{ alignItems: 'center', marginTop: 8, marginBottom: 8 }}>
           <Animated.View style={{ transform: [{ scale: copyAnim }] }}>
             <Pressable onPress={copyCode} style={({ pressed }) => [styles.codePill, { opacity: pressed ? 0.9 : 1, flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
-              <Ionicons name="clipboard-outline" size={16} color={colors.text.primary} />
+              <Ionicons name="clipboard-outline" size={16} color={colors.text.secondary} />
               <Text style={styles.codePillText}>Código de acesso: {formattedCode}</Text>
             </Pressable>
           </Animated.View>
@@ -279,6 +279,36 @@ export default function DashboardScreen() {
           <View style={styles.titleRow}>
             <Text style={styles.title}>Mesas</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={vm.loading || !vm.canClearAll}
+                accessibilityLabel="Limpar todas as mesas"
+                onPress={() => {
+                  Alert.alert(
+                    'Limpar mesas',
+                    'Tem certeza que deseja limpar todas as mesas?',
+                    [
+                      { text: 'Cancelar', style: 'cancel' },
+                      {
+                        text: 'Confirmar',
+                        style: 'destructive',
+                        onPress: async () => {
+                          await vm.clearAll()
+                        },
+                      },
+                    ]
+                  )
+                }}
+                style={({ pressed }) => [
+                  { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 16, backgroundColor: '#EFEAE2', opacity: vm.loading || !vm.canClearAll ? 0.5 : 1 },
+                  pressed ? { opacity: 0.8 } : null
+                ]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Ionicons name="trash-outline" size={16} color={colors.text.secondary} />
+                  <Text style={{ color: colors.text.secondary, fontSize: typography.size.sm }}>Limpar Mesas</Text>
+                </View>
+              </Pressable>
               <Pressable
                 accessibilityRole="button"
                 onPress={() => setSortAsc(v => !v)}
@@ -296,7 +326,6 @@ export default function DashboardScreen() {
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                   <Ionicons name="filter" size={16} color={colors.text.secondary} />
-                  <Text style={{ color: colors.text.secondary, fontSize: typography.size.sm }}>Preço</Text>
                 </View>
               </Pressable>
             </View>
@@ -305,7 +334,7 @@ export default function DashboardScreen() {
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 4, marginTop: 4 }}>
               <View style={[styles.inputBox, { flex: 1 }]}>
                 <TextInput
-                  placeholder="Min"
+                  placeholder="Preço Min."
                   placeholderTextColor={colors.text.secondary}
                   keyboardType="numeric"
                   value={minPrice}
@@ -315,7 +344,7 @@ export default function DashboardScreen() {
               </View>
               <View style={[styles.inputBox, { flex: 1 }]}>
                 <TextInput
-                  placeholder="Max"
+                  placeholder="Preço Máx."
                   placeholderTextColor={colors.text.secondary}
                   keyboardType="numeric"
                   value={maxPrice}
@@ -686,7 +715,7 @@ const styles = StyleSheet.create({
   },
   menuItem: { color: colors.text.primary, paddingVertical: 6 },
   codePill: { backgroundColor: '#EFEAE2', borderColor: colors.border, borderWidth: 1, borderRadius: 16, paddingVertical: 6, paddingHorizontal: 12 },
-  codePillText: { color: colors.text.primary, fontSize: typography.size.sm },
+  codePillText: { color: colors.text.secondary, fontSize: typography.size.sm },
   error: { color: colors.status.error, textAlign: 'center', marginTop: 8 },
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'flex-end' },
   modalCard: { backgroundColor: colors.background, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
