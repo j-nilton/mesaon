@@ -1,4 +1,4 @@
-# Política de Privacidade – NOME DO APP
+# Política de Privacidade – MesaOn
 
 Esta Política de Privacidade descreve como o aplicativo **MesaOn** coleta, utiliza, armazena e protege os dados pessoais dos usuários, em conformidade com a legislação aplicável, incluindo a Lei Geral de Proteção de Dados (LGPD – Lei nº 13.709/2018).
 
