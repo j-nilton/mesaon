@@ -2,6 +2,7 @@
 
 <p align="center">
   <img src="assets/logoMesaOn.png" alt="Logo do MesaOn" width="300">
+  <img src="assets/icon.png" alt="Logo do MesaOn" width="300">
 </p>
 
 ## Descrição
@@ -85,6 +86,79 @@ npx expo start
 
 Isso iniciará o Metro Bundler. Você pode então escanear o QR code com o aplicativo Expo Go em seu dispositivo móvel (Android) ou rodar em um emulador.
 
+## Configuração do Firebase (Android)
+
+Siga os passos abaixo para habilitar a comunicação com o Firebase no Android:
+
+1. Prebuild do projeto
+
+   Execute o prebuild para gerar os projetos nativos (android/ios):
+
+   ```bash
+   npx expo prebuild
+   ```
+
+2. Package (nome do aplicativo Android)
+
+   Ao criar o app no Firebase (Adicionar app Android), informe exatamente o valor do campo `package` configurado em app.json. Para este projeto:
+
+   ```
+   package: com.anonymous.MesaOn
+   ```
+
+3. Gradle em nível de projeto (android/build.gradle)
+
+   No arquivo build.gradle em nível da pasta `android`, garanta que o plugin de serviços do Google esteja declarado em `buildscript > dependencies`:
+
+   ```gradle
+   classpath('com.google.gms:google-services:4.4.4') // firebase
+   ```
+
+   Observação: este projeto já inclui essa linha; mantenha apenas uma declaração para evitar duplicidade.
+
+4. Gradle em nível de app (android/app/build.gradle)
+
+   No arquivo build.gradle em nível da pasta `app`, aplique o plugin:
+
+   ```gradle
+   apply plugin: "com.google.gms.google-services" // firebase
+   ```
+
+   Observação: este projeto já aplica esse plugin; não duplique a linha.
+
+5. Arquivo de configuração do Firebase (google-services.json)
+
+   Baixe o `google-services.json` do Firebase Console e coloque em `android/app/`. Para referência, o projeto utiliza google-services.json nesse caminho.
+
+6. Variáveis de ambiente (.env)
+
+   Crie um arquivo `.env` na raiz do projeto com as chaves públicas do Firebase:
+
+   ```
+   EXPO_PUBLIC_FIREBASE_API_KEY=""
+   EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=""
+   EXPO_PUBLIC_FIREBASE_PROJECT_ID=""
+   EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=""
+   EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=""
+   EXPO_PUBLIC_FIREBASE_APP_ID=""
+   ```
+
+   Essas variáveis serão lidas pelo app via `process.env.EXPO_PUBLIC_*` em tempo de build.
+
+7. Build e execução
+
+   - Build nativa Android:
+
+     ```bash
+     npx expo run:android
+     ```
+
+   - Após a build, iniciar o desenvolvimento:
+
+     ```bash
+     npx expo start
+     ```
+
 ## Estrutura do projeto (pastas)
 
 ```
@@ -97,5 +171,7 @@ Isso iniciará o Metro Bundler. Você pode então escanear o QR code com o aplic
 │   ├── model             # Camada de domínio
 │   ├── usecase           # Casos de uso
 │   └── viewmodel         # Camada de ViewModel
+├── .env                  # Variáveis de ambiente (Firebase)
+├── app.json              # Configuração Expo (inclui package Android)
 └── package.json          # Dependências e scripts do projeto
 ```
