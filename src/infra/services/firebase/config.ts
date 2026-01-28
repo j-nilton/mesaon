@@ -24,22 +24,31 @@ Object.entries(firebaseConfig).forEach(([key, value]) => {
 });
 
 // Inicialização do Firebase
-let app;
-// Inicializa o Firebase se ainda não tiver sido inicializado
-if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
+let app: any;
+let auth: any;
+let firestore: any;
+
+const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
+
+if (USE_MOCK) {
+  console.log('⚠️ MOCK MODE ENABLED: Skipping Firebase Initialization');
 } else {
-    // Se já houver uma instância inicializada, obtém-a
-    app = getApp();
+  // Inicializa o Firebase se ainda não tiver sido inicializado
+  if (!getApps().length) {
+      app = initializeApp(firebaseConfig);
+  } else {
+      // Se já houver uma instância inicializada, obtém-a
+      app = getApp();
+  }
+
+  // Inicialização do Firebase Auth
+  auth = initializeAuth(app, {
+    // Configuração de persistência para o Firebase Auth
+    persistence: getReactNativePersistence(AsyncStorage)
+  });
+
+  // Inicialização do Firestore
+  firestore = getFirestore(app);
 }
-
-// Inicialização do Firebase Auth
-const auth = initializeAuth(app, {
-  // Configuração de persistência para o Firebase Auth
-  persistence: getReactNativePersistence(AsyncStorage)
-});
-
-// Inicialização do Firestore
-const firestore = getFirestore(app);
 
 export { app, auth, firestore };

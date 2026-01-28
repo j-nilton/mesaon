@@ -67,6 +67,8 @@ export default function CollaboratorCodeStandalone() {
       {/* Campo de código com botão de copiar à direita */}
       <View style={[styles.inputContainer, { height: 52 * scale, borderRadius: 10 * scale }]}>
         <TextInput
+          testID="access-code-input"
+          accessibilityLabel="access-code-input"
           value={vm.codeInput}
           onChangeText={vm.onChange}
           placeholder="Digite o código aqui"
@@ -88,6 +90,8 @@ export default function CollaboratorCodeStandalone() {
       {/* Botões de ação conforme mock: Gerar (outline) e Confirmar (primário) */}
       <View style={[styles.actions, { gap: 12 * scale }]}>
         <Pressable
+          testID="generate-code-button"
+          accessibilityLabel="generate-code-button"
           onPress={onGenerate}
           disabled={vm.isLoading}
           style={({ pressed }) => [
@@ -98,6 +102,8 @@ export default function CollaboratorCodeStandalone() {
           <Text style={[styles.secondaryBtnText, { fontSize: typography.size.md }]}>Gerar Código</Text>
         </Pressable>
         <Pressable
+          testID="confirm-code-button"
+          accessibilityLabel="confirm-code-button"
           onPress={onConfirm}
           disabled={vm.status !== 'success' || vm.isLoading}
           style={({ pressed }) => [

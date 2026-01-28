@@ -18,6 +18,8 @@ export default function RecoverPasswordScreen() {
         <Text style={styles.title}>Recuperar senha</Text>
         <Text style={styles.subtitle}>Informe seu e-mail para receber o link de recuperação</Text>
         <Input
+          testID="recover-email-input"
+          accessibilityLabel="recover-email-input"
           placeholder="Email"
           value={vm.email}
           onChangeText={vm.setEmail}
@@ -26,6 +28,8 @@ export default function RecoverPasswordScreen() {
         />
         {!!vm.errorMessage && <Text style={styles.error}>{vm.errorMessage}</Text>}
         <Button
+          testID="recover-submit-button"
+          accessibilityLabel="recover-submit-button"
           title="Enviar e-mail"
           onPress={async () => {
             const ok = await vm.submit()

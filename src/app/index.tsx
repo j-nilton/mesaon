@@ -170,6 +170,8 @@ export default function LoginScreen() {
 
         <View style={styles.form}>
           <Input
+            testID="email-input"
+            accessibilityLabel="email-input"
             placeholder="Email"
             value={viewModel.email}
             onChangeText={viewModel.setEmail}
@@ -178,6 +180,8 @@ export default function LoginScreen() {
           />
 
           <Input
+            testID="password-input"
+            accessibilityLabel="password-input"
             placeholder="Senha"
             value={viewModel.password}
             onChangeText={viewModel.setPassword}
@@ -186,7 +190,7 @@ export default function LoginScreen() {
 
           <View style={styles.forgotPasswordContainer}>
             <Link href="/recover-password" asChild>
-              <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
+              <Text testID="forgot-password-link" accessibilityLabel="forgot-password-link" style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
             </Link>
           </View>
 
@@ -195,6 +199,8 @@ export default function LoginScreen() {
           )}
 
           <Button
+            testID="login-button"
+            accessibilityLabel="login-button"
             title="Entrar"
             onPress={viewModel.handleLogin}
             loading={viewModel.isLoading}
@@ -205,6 +211,8 @@ export default function LoginScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Não tem conta ainda?</Text>
           <Button
+            testID="register-button"
+            accessibilityLabel="register-button"
             title="Cadastre-se"
             variant="text"
             onPress={viewModel.navigateToRegister}

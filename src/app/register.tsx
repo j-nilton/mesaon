@@ -140,6 +140,8 @@ export default function RegisterScreen() {
 
         <View style={styles.form}>
           <Input
+            testID="name-input"
+            accessibilityLabel="name-input"
             placeholder="Nome"
             value={viewModel.name}
             onChangeText={viewModel.setName}
@@ -147,6 +149,8 @@ export default function RegisterScreen() {
           />
 
           <Input
+            testID="email-input"
+            accessibilityLabel="email-input"
             placeholder="Email"
             value={viewModel.email}
             onChangeText={viewModel.setEmail}
@@ -155,6 +159,8 @@ export default function RegisterScreen() {
           />
 
           <Input
+            testID="password-input"
+            accessibilityLabel="password-input"
             placeholder="Senha"
             value={viewModel.password}
             onChangeText={viewModel.setPassword}
@@ -178,6 +184,8 @@ export default function RegisterScreen() {
           </View>
 
           <Input
+            testID="confirm-password-input"
+            accessibilityLabel="confirm-password-input"
             placeholder="Confirmar senha"
             value={viewModel.confirmPassword}
             onChangeText={viewModel.setConfirmPassword}
@@ -189,6 +197,8 @@ export default function RegisterScreen() {
           )}
 
           <Button
+            testID="register-submit-button"
+            accessibilityLabel="register-submit-button"
             title="Confirmar cadastro"
             onPress={viewModel.handleRegister}
             loading={viewModel.isLoading}
@@ -199,6 +209,8 @@ export default function RegisterScreen() {
         <View style={styles.footer}>
           <Text style={styles.footerText}>Já tem conta?</Text>
           <Button
+            testID="login-link"
+            accessibilityLabel="login-link"
             title="Faça login"
             variant="text"
             onPress={viewModel.navigateToLogin}

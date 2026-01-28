@@ -25,12 +25,21 @@ import { SubscribeTablesByCodeUseCase } from '../usecase/SubscribeTablesByCodeUs
 import { RecoverPasswordUseCase } from '../usecase/RecoverPasswordUseCase'
 import { AuthService } from '../model/services/AuthService'
 
+import { MockAuthService } from '../infra/services/mock/MockAuthService'
+import { MockAccessCodeService } from '../infra/services/mock/MockAccessCodeService'
+import { MockProductService } from '../infra/services/mock/MockProductService'
+import { MockTableService } from '../infra/services/mock/MockTableService'
+
+// FLAG PARA MOCK (Controlado via variável de ambiente)
+// Para usar mocks: EXPO_PUBLIC_USE_MOCK=true
+const USE_MOCK = process.env.EXPO_PUBLIC_USE_MOCK === 'true';
+
 // Singleton simples para Injeção de Dependência
 class DIContainer {
-  private static _authService: AuthService = new FirebaseAuthService()
-  private static _accessCodeService = new AccessCodeServiceFirebase()
-  private static _productService = new ProductServiceFirebase()
-  private static _tableService = new TableServiceFirebase()
+  private static _authService: AuthService = USE_MOCK ? new MockAuthService() : new FirebaseAuthService()
+  private static _accessCodeService = USE_MOCK ? new MockAccessCodeService() : new AccessCodeServiceFirebase()
+  private static _productService = USE_MOCK ? new MockProductService() : new ProductServiceFirebase()
+  private static _tableService = USE_MOCK ? new MockTableService() : new TableServiceFirebase()
 
   static getLoginUseCase(): LoginUseCase {
     return new LoginUseCase(this._authService)

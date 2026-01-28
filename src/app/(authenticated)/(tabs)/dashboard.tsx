@@ -12,14 +12,14 @@ import { calculateMenuPosition, shouldShowFab, Rect, handlePopupClose } from '..
 import { Table } from '../../../model/entities/Table'
 import { filterTablesByPriceRange, formatCurrency, sortTablesByPrice } from '../../../viewmodel/priceUtils'
 
-const TableRow = ({ 
-  table: t, 
-  idx, 
-  onOpenMenu 
-}: { 
-  table: Table, 
-  idx: number, 
-  onOpenMenu: (id: string, rect: Rect) => void 
+const TableRow = ({
+  table: t,
+  idx,
+  onOpenMenu
+}: {
+  table: Table,
+  idx: number,
+  onOpenMenu: (id: string, rect: Rect) => void
 }) => {
   const badge = String(idx + 1).padStart(2, '0')
   const occupied = (t.orders?.length || 0) > 0 || (t.total || 0) > 0
@@ -90,12 +90,12 @@ export default function DashboardScreen() {
     container.getSubscribeTablesByCodeUseCase()
   )
   const createVM = useCreateTableViewModel(container.getCreateTableUseCase(), accessCode)
-  const formattedCode = accessCode ? `${accessCode.slice(0,3)} - ${accessCode.slice(3,6)} - ${accessCode.slice(6,9)}` : undefined
+  const formattedCode = accessCode ? `${accessCode.slice(0, 3)} - ${accessCode.slice(3, 6)} - ${accessCode.slice(6, 9)}` : undefined
   const [sortAsc, setSortAsc] = useState(true)
   const [filterOpen, setFilterOpen] = useState(false)
   const [minPrice, setMinPrice] = useState<string>('')
-  const [maxPrice, setMaxPrice] = useState<string>('') 
-  
+  const [maxPrice, setMaxPrice] = useState<string>('')
+
   const onQueryChange = (text: string) => {
     if (queryDebounce.current) clearTimeout(queryDebounce.current)
     setQuery(text) // Atualiza o estado imediatamente para o input
@@ -103,14 +103,14 @@ export default function DashboardScreen() {
       vm.setQuery(text) // Aplica o filtro no ViewModel após o debounce
     }, 300)
   }
-  
+
   const displayedTables = React.useMemo(() => {
     const min = minPrice.trim() ? Number(minPrice.replace(',', '.')) : undefined
     const max = maxPrice.trim() ? Number(maxPrice.replace(',', '.')) : undefined
     const filtered = filterTablesByPriceRange(vm.tables, min, max)
     return sortTablesByPrice(filtered, sortAsc)
   }, [vm.tables, minPrice, maxPrice, sortAsc])
-  
+
   const copyCode = async () => {
     if (!accessCode) return
     await Clipboard.setStringAsync(accessCode.replace(/\D/g, ''))
@@ -241,7 +241,7 @@ export default function DashboardScreen() {
                   Alert.alert('Sair', 'Deseja realmente sair?', [
                     { text: 'Cancelar', style: 'cancel' },
                     {
-                      text: 'Sair',
+                      text: 'Confirmar',
                       style: 'destructive',
                       onPress: async () => {
                         await container.getAuthService().logout()
@@ -345,16 +345,16 @@ export default function DashboardScreen() {
               }
             }} scrollEventThrottle={16}>
               {displayedTables.map((t, idx) => (
-                  <TableRow 
-                    key={t.id} 
-                    table={t} 
-                    idx={idx} 
-                    onOpenMenu={(id, rect) => {
-                  setMenuPosition(calculateMenuPosition(rect, height, width, false))
-                  setOpenMenuId(prev => (prev === id ? undefined : id))
-                }} 
-                  />
-                ))}
+                <TableRow
+                  key={t.id}
+                  table={t}
+                  idx={idx}
+                  onOpenMenu={(id, rect) => {
+                    setMenuPosition(calculateMenuPosition(rect, height, width, false))
+                    setOpenMenuId(prev => (prev === id ? undefined : id))
+                  }}
+                />
+              ))}
             </ScrollView>
           )}
         </View>
@@ -363,11 +363,11 @@ export default function DashboardScreen() {
         <>
           <Pressable style={{ position: 'absolute', left: 0, right: 0, top: 0, bottom: 0, zIndex: 2000 }} onPress={() => setOpenMenuId(undefined)} />
           <Animated.View style={[
-            styles.kebabMenu, 
-            { 
-              zIndex: 2001, 
-              top: menuPosition?.top, 
-              bottom: menuPosition?.bottom, 
+            styles.kebabMenu,
+            {
+              zIndex: 2001,
+              top: menuPosition?.top,
+              bottom: menuPosition?.bottom,
               right: menuPosition?.right,
               opacity: kebabAnim,
               transform: [{ scale: kebabAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 1] }) }]
@@ -423,22 +423,22 @@ export default function DashboardScreen() {
       {(() => {
         const fabEnabled = !!accessCode && /^\d{9}$/.test(accessCode)
         return (
-      <Pressable
-        accessibilityRole="button"
-        style={({ pressed }) => [
-          styles.fab,
-          {
-            backgroundColor: pressed ? '#E67E22' : colors.primary,
-            shadowOpacity: 0.2,
-            opacity: fabEnabled ? 1 : 0.6,
-            display: showFab ? 'flex' : 'none',
-          },
-        ]}
-        disabled={!fabEnabled}
-        onPress={createVM.open}
-      >
-        <Ionicons name="add" size={24} color={colors.text.inverted} />
-      </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            style={({ pressed }) => [
+              styles.fab,
+              {
+                backgroundColor: pressed ? '#E67E22' : colors.primary,
+                shadowOpacity: 0.2,
+                opacity: fabEnabled ? 1 : 0.6,
+                display: showFab ? 'flex' : 'none',
+              },
+            ]}
+            disabled={!fabEnabled}
+            onPress={createVM.open}
+          >
+            <Ionicons name="add" size={24} color={colors.text.inverted} />
+          </Pressable>
         )
       })()}
       <Modal visible={createVM.isOpen} transparent animationType="fade" onRequestClose={createVM.close}>
@@ -446,7 +446,7 @@ export default function DashboardScreen() {
           <Pressable style={StyleSheet.absoluteFill} onPress={createVM.close} />
           <Animated.View style={[
             styles.modalCard,
-            { 
+            {
               transform: [{ translateY: modalAnim.interpolate({ inputRange: [0, 1], outputRange: [24, 0] }) }],
               opacity: modalAnim,
             }
@@ -455,70 +455,70 @@ export default function DashboardScreen() {
               <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
                 <Text style={styles.modalTitle}>Nova Mesa</Text>
               </View>
-                  <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-                    <Text style={styles.label}>Nome da mesa</Text>
-                    <View style={styles.inputBox}>
-                      <TextInput
-                        placeholder="Digite o nome da mesa"
-                        placeholderTextColor={colors.text.secondary}
-                        value={createVM.name}
-                        onChangeText={createVM.setName}
-                        style={styles.input}
-                      />
-                    </View>
-                  </View>
-                  <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-                    <Text style={styles.label}>Nome do garçom</Text>
-                    <View style={styles.inputBox}>
-                      <TextInput
-                        placeholder="Informe o nome do garçom"
-                        placeholderTextColor={colors.text.secondary}
-                        value={createVM.waiterName}
-                        onChangeText={createVM.setWaiterName}
-                        style={styles.input}
-                      />
-                    </View>
-                  </View>
-                  <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
-                    <Text style={styles.label}>Observações</Text>
-                    <View style={[styles.inputBox, { minHeight: 96 }]}>
-                      <TextInput
-                        placeholder="Adicione observações sobre a mesa"
-                        placeholderTextColor={colors.text.secondary}
-                        value={createVM.notes}
-                        onChangeText={createVM.setNotes}
-                        style={[styles.input, { minHeight: 96 }]}
-                        multiline
-                      />
-                    </View>
-                  </View>
-                  {createVM.errorMessage ? <Text style={[styles.error, { paddingHorizontal: 16 }]}>{createVM.errorMessage}</Text> : null}
-                  <View style={styles.modalFooter}>
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.secondaryBtn,
-                        { borderColor: colors.primary, backgroundColor: '#FFF', opacity: pressed ? 0.8 : 1 },
-                      ]}
-                      onPress={createVM.close}
-                    >
-                      <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Cancelar</Text>
-                    </Pressable>
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.primaryBtn,
-                        { backgroundColor: pressed ? '#E67E22' : colors.primary, opacity: createVM.canSubmit ? 1 : 0.7 },
-                      ]}
-                      disabled={!createVM.canSubmit || createVM.isLoading}
-                      onPress={async () => {
-                        const created = await createVM.submit()
-                        if (created) {
-                          vm.refresh()
-                        }
-                      }}
-                    >
-                      <Text style={styles.primaryBtnText}>Salvar</Text>
-                    </Pressable>
-                  </View>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Text style={styles.label}>Nome da mesa</Text>
+                <View style={styles.inputBox}>
+                  <TextInput
+                    placeholder="Digite o nome da mesa"
+                    placeholderTextColor={colors.text.secondary}
+                    value={createVM.name}
+                    onChangeText={createVM.setName}
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Text style={styles.label}>Nome do garçom</Text>
+                <View style={styles.inputBox}>
+                  <TextInput
+                    placeholder="Informe o nome do garçom"
+                    placeholderTextColor={colors.text.secondary}
+                    value={createVM.waiterName}
+                    onChangeText={createVM.setWaiterName}
+                    style={styles.input}
+                  />
+                </View>
+              </View>
+              <View style={{ paddingHorizontal: 16, paddingTop: 8 }}>
+                <Text style={styles.label}>Observações</Text>
+                <View style={[styles.inputBox, { minHeight: 96 }]}>
+                  <TextInput
+                    placeholder="Adicione observações sobre a mesa"
+                    placeholderTextColor={colors.text.secondary}
+                    value={createVM.notes}
+                    onChangeText={createVM.setNotes}
+                    style={[styles.input, { minHeight: 96 }]}
+                    multiline
+                  />
+                </View>
+              </View>
+              {createVM.errorMessage ? <Text style={[styles.error, { paddingHorizontal: 16 }]}>{createVM.errorMessage}</Text> : null}
+              <View style={styles.modalFooter}>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.secondaryBtn,
+                    { borderColor: colors.primary, backgroundColor: '#FFF', opacity: pressed ? 0.8 : 1 },
+                  ]}
+                  onPress={createVM.close}
+                >
+                  <Text style={[styles.secondaryBtnText, { color: colors.primary }]}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.primaryBtn,
+                    { backgroundColor: pressed ? '#E67E22' : colors.primary, opacity: createVM.canSubmit ? 1 : 0.7 },
+                  ]}
+                  disabled={!createVM.canSubmit || createVM.isLoading}
+                  onPress={async () => {
+                    const created = await createVM.submit()
+                    if (created) {
+                      vm.refresh()
+                    }
+                  }}
+                >
+                  <Text style={styles.primaryBtnText}>Salvar</Text>
+                </Pressable>
+              </View>
             </ScrollView>
           </Animated.View>
         </View>
